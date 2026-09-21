@@ -3,3 +3,4 @@ LayoutSwitcher.app/
 .DS_Store
 # frequency lists for Tools/trigrams.py: downloaded, never committed
 *_50k.txt
+dist/

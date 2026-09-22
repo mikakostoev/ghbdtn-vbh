@@ -331,16 +331,23 @@ Expected: grep пуст.
 perl -pi -e 's#https://github.com/mikakostoev/layout-switcher#https://github.com/mikakostoev/ghbdtn-vbh#g; s#brew tap mikakostoev/layout-switcher#brew tap mikakostoev/ghbdtn-vbh#; s#--no-quarantine layoutswitcher#--no-quarantine ghbdtn-vbh#; s#cd layout-switcher#cd ghbdtn-vbh#; s#`LayoutSwitcher\.app`#`ghbdtn vbh.app`#g; s#open LayoutSwitcher\.app#open "ghbdtn vbh.app"#; s#Application Support/LayoutSwitcher/#Application Support/ghbdtn vbh/#' README.md CONTRIBUTING.md
 ```
 
-Первые две строки README заменить на:
+Первые строки README (заголовок, строку с одним бейджем `test` и абзац «You type `ghbdtn`, you get «привет». Free, open source…») заменить на:
 
 ```markdown
 # ghbdtn vbh → привет мир
+
+[![test](https://github.com/mikakostoev/ghbdtn-vbh/actions/workflows/test.yml/badge.svg)](https://github.com/mikakostoev/ghbdtn-vbh/actions/workflows/test.yml)
+[![release](https://img.shields.io/github/v/release/mikakostoev/ghbdtn-vbh?label=release)](https://github.com/mikakostoev/ghbdtn-vbh/releases/latest)
+[![downloads](https://img.shields.io/github/downloads/mikakostoev/ghbdtn-vbh/total?label=downloads)](https://github.com/mikakostoev/ghbdtn-vbh/releases)
+[![macOS 13+](https://img.shields.io/badge/macOS-13%2B-black?logo=apple)](#installation-in-detail)
+[![Swift 5.9](https://img.shields.io/badge/Swift-5.9-F05138?logo=swift&logoColor=white)](Package.swift)
+[![license MIT](https://img.shields.io/github/license/mikakostoev/ghbdtn-vbh?label=license)](LICENSE)
 
 Keyboard layout auto-switcher for macOS. You type `ghbdtn vbh`, you get «привет мир». Free, open source, and
 nothing phones home: the app contains no networking code at all.
 ```
 
-(Старый абзац «You type `ghbdtn`, you get «привет». Free, open source…» — удалить, он заменён строкой выше.)
+Бейджи — картинки с shields.io в README на GitHub, приложение их не трогает; обещание «нет сети в приложении» это не задевает. Бейджи `release` и `downloads` покажут данные после переименования репо (Task 5); до этого shields.io отдаёт «not found» — это ожидаемо.
 
 В разделе Quick start пункт 1 дополнить предложением после команды brew: `The cask points at the first release under the new name, 2.0.0.` В разделе «Building from source» строка про `LayoutSwitcher Local Signing` остаётся как есть.
 

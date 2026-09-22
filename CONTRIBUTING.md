@@ -6,12 +6,12 @@ stay free of networking code.
 ## Getting started
 
 ```bash
-git clone https://github.com/mikakostoev/layout-switcher.git && cd layout-switcher
-./build.sh && open LayoutSwitcher.app
+git clone https://github.com/mikakostoev/ghbdtn-vbh.git && cd ghbdtn-vbh
+./build.sh && open "ghbdtn vbh.app"
 ```
 
 Xcode or the Command Line Tools, macOS 13+. Tasks for a first contribution are labelled
-[good first issue](https://github.com/mikakostoev/layout-switcher/labels/good%20first%20issue) — pick any and
+[good first issue](https://github.com/mikakostoev/ghbdtn-vbh/labels/good%20first%20issue) — pick any and
 leave a comment saying you took it.
 
 ## What to check before a PR
@@ -36,7 +36,7 @@ leave a comment saying you took it.
 
 ## How the code is laid out
 
-About a thousand lines in `Sources/LayoutSwitcher/` (not counting the generated `Trigrams.swift`), readable in an
+About a thousand lines in `Sources/ghbdtnvbh/` (not counting the generated `Trigrams.swift`), readable in an
 evening:
 
 | File | Responsibility |

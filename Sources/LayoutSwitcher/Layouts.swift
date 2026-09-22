@@ -338,12 +338,14 @@ func selfTest() {
         precondition(convert("für", layouts: [de, ru])?.text == ru.translate(fur))
     }
     // Ukrainian: a third layout next to the two. "ghsdbn" is a word only there; "лгіусед" still goes to English.
+    // "ghbdtn" reads "привет" in both Cyrillic layouts, and whether the Ukrainian speller lets that pass differs
+    // between Macs, so only the text is checked there.
     if let uk = all.first(where: { $0.id == "com.apple.keylayout.Ukrainian" }) {
         let pryvit = keys([5, 4, 1, 2, 11, 45])
         precondition(uk.translate(pryvit) == "привіт" && ru.translate(pryvit) == "прывит")
         precondition(intendedLayout(for: pryvit, current: us, others: [ru, uk], exceptions: [])?.id == uk.id)
         precondition(intendedLayout(for: pryvit, current: uk, others: [us, ru], exceptions: []) == nil)
-        precondition(intendedLayout(for: ghbdtn, current: us, others: [uk, ru], exceptions: [])?.id == ru.id)
+        precondition(intendedLayout(for: ghbdtn, current: us, others: [uk, ru], exceptions: [])?.translate(ghbdtn) == "привет")
         precondition(intendedLayout(for: kubectl, current: uk, others: [us, ru], exceptions: [])?.id == us.id)
         // In no dictionary: "загуглити" against "pfueuksns" and "загуглыты" is decided by the tables.
         let zahuhlyty = keys([35, 3, 32, 14, 32, 40, 1, 45, 1])

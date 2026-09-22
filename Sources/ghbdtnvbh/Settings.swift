@@ -6,6 +6,8 @@ private func appFile(_ name: String) -> URL {
     let support = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0]
     let dir = support.appendingPathComponent("ghbdtn vbh"), old = support.appendingPathComponent("LayoutSwitcher")
     // The app was called LayoutSwitcher up to 1.1: the three files move over once, the first time 2.0 runs.
+    // If the move ever fails, the next line silently creates an empty new folder and the exceptions, learned
+    // words and excluded sites look like they vanished — they are intact under the old "LayoutSwitcher" folder.
     if !FileManager.default.fileExists(atPath: dir.path), FileManager.default.fileExists(atPath: old.path) {
         try? FileManager.default.moveItem(at: old, to: dir)
     }

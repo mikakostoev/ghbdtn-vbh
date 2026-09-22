@@ -15,6 +15,7 @@ final class Switcher: NSObject, NSApplicationDelegate, NSMenuDelegate {
     private var tap: CFMachPort?
 
     private var settingsWindow: NSWindow?
+    private var onboardingWindow: NSWindow?
 
     private var buffer = Buffer()
     private var optionAlone = false
@@ -50,6 +51,7 @@ final class Switcher: NSObject, NSApplicationDelegate, NSMenuDelegate {
         Timer.scheduledTimer(withTimeInterval: 2, repeats: true) { [weak self] timer in
             if self?.startTap() == true { timer.invalidate(); self?.showState() }
         }.fire()
+        if tap == nil { openOnboarding() }
     }
 
     func menuNeedsUpdate(_ menu: NSMenu) {
@@ -60,7 +62,7 @@ final class Switcher: NSObject, NSApplicationDelegate, NSMenuDelegate {
             item.target = self
             item.state = on ? .on : .off
         }
-        if tap == nil { add("No access: Accessibility…", #selector(openAccessibility)) }
+        if tap == nil { add("No access: Accessibility…", #selector(openOnboarding)) }
         add("Auto-switch", #selector(toggleEnabled), on: enabled)
         menu.addItem(.separator())
         add("Settings…", #selector(openSettings))
@@ -101,6 +103,22 @@ final class Switcher: NSObject, NSApplicationDelegate, NSMenuDelegate {
         NSWorkspace.shared.open(URL(string: "x-apple.systempreferences:com.apple.preference.security?Privacy_Accessibility")!)
     }
 
+    @objc private func openOnboarding() {
+        if onboardingWindow == nil {
+            let view = OnboardingView(afterUpdate: defaults.bool(forKey: "onboarded"),
+                                      openAccessibility: { [weak self] in self?.openAccessibility() },
+                                      close: { [weak self] in self?.onboardingWindow?.close() })
+            let window = NSWindow(contentViewController: NSHostingController(rootView: view))
+            window.title = "ghbdtn vbh"
+            window.styleMask = [.titled, .closable]
+            window.isReleasedWhenClosed = false
+            onboardingWindow = window
+        }
+        onboardingWindow?.center()
+        onboardingWindow?.makeKeyAndOrderFront(nil)
+        NSApp.activate(ignoringOtherApps: true)
+    }
+
     // MARK: Event tap
 
     private func startTap() -> Bool {
@@ -111,6 +129,7 @@ final class Switcher: NSObject, NSApplicationDelegate, NSMenuDelegate {
             switcher.handle(type, event) ? Unmanaged.passUnretained(event) : nil
         }, userInfo: nil) else { return false }
         CFRunLoopAddSource(CFRunLoopGetMain(), CFMachPortCreateRunLoopSource(nil, tap, 0), .commonModes)
+        defaults.set(true, forKey: "onboarded")  // the "after an update" text is for Macs that got this far once
         self.tap = tap
         return true
     }

@@ -27,3 +27,11 @@
 "Remove" = "Remove";
 "Add app…" = "Add app…";
 "The layout is never switched by itself on these sites — one per line: github.com" = "The layout is never switched by itself on these sites — one per line: github.com";
+
+"To fix the layout, the app has to see what you type. Allow it under Accessibility." = "To fix the layout, the app has to see what you type. Allow it under Accessibility.";
+"The update changed the app's signature and macOS forgot the permission. Untick ghbdtn vbh in the list and tick it again." = "The update changed the app's signature and macOS forgot the permission. Untick ghbdtn vbh in the list and tick it again.";
+"Open Accessibility settings" = "Open Accessibility settings";
+"Waiting for permission…" = "Waiting for permission…";
+"Access granted" = "Access granted";
+"Try it: type ghbdtn vbh and press space" = "Try it: type ghbdtn vbh and press space";
+"Done" = "Done";

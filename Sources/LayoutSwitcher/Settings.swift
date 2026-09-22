@@ -24,9 +24,22 @@ func excludedSites() -> Set<String> {
     })
 }
 
+/// Re-read only when the file changed: this is asked on every word from inside the event tap, and words.txt
+/// grows for years — 5 000 learned words cost 3 ms to parse against 3 microseconds to stat.
+/// Not `URL.resourceValues`: it caches inside the URL and goes on reporting the size and date of a stale read.
+// ponytail: no lock, everything here runs on the main thread (the event tap source is on the main run loop).
+private var cachedWords: [URL: (mtime: timespec, size: off_t, words: Set<String>)] = [:]
+
 func wordSet(_ file: URL) -> Set<String> {
+    var info = stat()
+    let missing = stat(file.path, &info) != 0
+    let mtime = missing ? timespec() : info.st_mtimespec, size: off_t = missing ? -1 : info.st_size
+    if let hit = cachedWords[file], hit.mtime.tv_sec == mtime.tv_sec, hit.mtime.tv_nsec == mtime.tv_nsec,
+       hit.size == size { return hit.words }
     let text = (try? String(contentsOf: file, encoding: .utf8)) ?? ""
-    return Set(text.lowercased().split(whereSeparator: \.isNewline).map { $0.trimmingCharacters(in: .whitespaces) })
+    let words = Set(text.lowercased().split(whereSeparator: \.isNewline).map { $0.trimmingCharacters(in: .whitespaces) })
+    cachedWords[file] = (mtime, size, words)
+    return words
 }
 
 struct SettingsView: View {

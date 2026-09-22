@@ -225,6 +225,21 @@ func isMistypedShort(_ keys: [Key], current: Layout, target: Layout) -> Bool {
 }
 
 func selfTest() {
+    // The word files are read once and cached until they change; a change the cache misses means an
+    // exception stops applying or a just-learned word never switches.
+    let file = URL(fileURLWithPath: NSTemporaryDirectory()).appendingPathComponent("layoutswitcher-selftest.txt")
+    try! "one\n".write(to: file, atomically: true, encoding: .utf8)
+    precondition(wordSet(file) == ["one"])
+    try! "one\ntwo\n".write(to: file, atomically: true, encoding: .utf8)
+    precondition(wordSet(file) == ["one", "two"])
+    let handle = try! FileHandle(forWritingTo: file)  // how learned words are actually added
+    handle.seekToEndOfFile()
+    handle.write("three\n".data(using: .utf8)!)
+    try! handle.close()
+    precondition(wordSet(file) == ["one", "two", "three"])
+    try! FileManager.default.removeItem(at: file)
+    precondition(wordSet(file).isEmpty)
+
     let all = keyboardLayouts(installed: true)
     guard let us = all.first(where: { $0.id == "com.apple.keylayout.US" }),
           let ru = all.first(where: { $0.id == "com.apple.keylayout.Russian" }) else { fatalError("US/Russian layouts not installed") }

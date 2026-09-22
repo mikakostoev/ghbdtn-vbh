@@ -16,7 +16,7 @@ You start typing in one language while the keyboard is still in another layout �
 spot. `ghbdtn rfr ltkf hello` becomes «привет как дела hello». It works with any keyboard layout macOS knows,
 not only Russian and English ([details below](#languages)).
 
-![Typed ghbdtn rfr ltkf hello — the screen shows привет как дела hello](.github/demo.gif)
+![Typed ghbdtn rfr ltkf hello — the screen shows привет как дела hello](docs/demo.gif)
 
 To fix only the last word, or the text you have selected, press Option twice (the shortcut is configurable).
 

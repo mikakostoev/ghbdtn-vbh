@@ -84,7 +84,7 @@ the system dictionary and the built-in letter statistics (available for 35 langu
 it works and where it doesn't.
 
 **Works like Russian and English do:** Ukrainian, German, French, Spanish, Italian, Portuguese, Dutch, Danish,
-Norwegian, Swedish, Finnish, Icelandic, Czech, Polish, Slovak, Hungarian, Romanian, Bulgarian, Greek, Turkish,
+Norwegian, Swedish, Finnish, Icelandic, Czech, Polish, Hungarian, Romanian, Bulgarian, Greek, Turkish,
 Lithuanian, Hebrew, Arabic. Only Russian, English, Ukrainian and German are checked on texts; the others use the
 same mechanism.
 

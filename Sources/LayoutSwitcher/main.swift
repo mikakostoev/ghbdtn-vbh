@@ -16,12 +16,7 @@ final class Switcher: NSObject, NSApplicationDelegate, NSMenuDelegate {
 
     private var settingsWindow: NSWindow?
 
-    private var word: [Key] = []
-    private var prefix: [[Key]] = []   // short words right before `word` that we left alone, judged together with it
-    private var settled = false        // a long word before them stayed as typed: this layout is the intended one
-    private var trailingSpaces = 0
-    private var wordEnded = false
-    private var autoSwitched = false   // last replacement was automatic; a manual convert right after means "wrong guess"
+    private var buffer = Buffer()
     private var optionAlone = false
     private var copying = false        // a clipboard round-trip for the selection is in flight
     private var lastOptionTap: TimeInterval?   // double-Option mode: when the first lone tap happened
@@ -146,7 +141,7 @@ final class Switcher: NSObject, NSApplicationDelegate, NSMenuDelegate {
                 optionAlone = false
                 if defaults.object(forKey: "manualConvert") as? Bool ?? true, optionTapCompletes() {
                     // Clicking, arrows and shortcuts empty the buffer, so an empty buffer means "not right after typing".
-                    if word.isEmpty { convertSelection() } else { convertManually() }
+                    if buffer.isEmpty { convertSelection() } else { convertManually() }
                 }
             } else {
                 optionAlone = false
@@ -157,25 +152,13 @@ final class Switcher: NSObject, NSApplicationDelegate, NSMenuDelegate {
             if !flags.intersection(shortcut).isEmpty {
                 reset()
             } else if code == backspace {
-                if wordEnded || word.isEmpty { reset() } else { word.removeLast() }
+                buffer.removeLast()
             } else if wordEnders.contains(code) {
                 return endWord(with: code, flags: flags)
             } else if let char = currentLayout()?.translate([Key(code: code, shift: false, caps: false)]).unicodeScalars.first,
                       char.value > 0x20, char.value != 0x7F, !(0xF700...0xF8FF).contains(char.value) {
-                if wordEnded {
-                    // "Ye ns lf`im": "Ye" and "ns" pass for words, so they wait here until a longer word shows
-                    // the layout was wrong. After "press the" it evidently wasn't, unless a sentence just ended.
-                    var waiting: [[Key]] = [], stays = false
-                    if trailingSpaces == 1, !autoSwitched {
-                        let short = word.count <= 4
-                        if short, !settled { waiting = Array((prefix + [word]).suffix(3)) }
-                        stays = short ? settled : !".?!".contains(currentLayout()?.translate([word.last!]) ?? "")
-                    }
-                    reset()
-                    prefix = waiting
-                    settled = stays
-                }
-                word.append(Key(code: code, shift: flags.contains(.maskShift), caps: flags.contains(.maskAlphaShift)))
+                buffer.letter(Key(code: code, shift: flags.contains(.maskShift), caps: flags.contains(.maskAlphaShift)),
+                              current: currentLayout())
             } else {
                 reset()  // arrows, escape, function keys: the caret moved, the buffer is stale
             }
@@ -187,38 +170,13 @@ final class Switcher: NSObject, NSApplicationDelegate, NSMenuDelegate {
     }
 
     private func endWord(with code: UInt16, flags: CGEventFlags) -> Bool {
-        if wordEnded || word.isEmpty {
-            if code == space, wordEnded { trailingSpaces += 1 } else { reset() }
-            return true
-        }
-        let layouts = keyboardLayouts()
-        if let current = currentLayout(), layouts.contains(where: { $0.id == current.id }),
-           let number = fixedNumber(for: word, current: current, others: layouts.filter { $0.id != current.id }),
-           !siteExcluded() {
-            replace(current.translate(word).count, with: number)
-            post(code, flags: flags.intersection(.maskShift))
-            if code == space { wordEnded = true; trailingSpaces = 1 } else { reset() }
-            return false
-        }
-        guard let current = currentLayout(), layouts.contains(where: { $0.id == current.id }),
-              let target = intendedLayout(for: word, current: current, others: layouts.filter { $0.id != current.id },
-                                          exceptions: exceptions, learned: wordSet(learnedFile)),
-              !siteExcluded() else {
-            if code == space { wordEnded = true; trailingSpaces = 1 } else { reset() }
-            return true
-        }
-        var stale = current.translate(word).count, fixed = target.translate(word)
-        if defaults.object(forKey: "oneLetterWords") as? Bool ?? true {
-            for keys in prefix.reversed() {
-                guard isMistypedShort(keys, current: current, target: target) else { break }
-                stale += current.translate(keys).count + 1
-                fixed = target.translate(keys) + " " + fixed
-            }
-        }
-        replace(stale, with: fixed)
+        guard let fix = buffer.end(space: code == space, current: currentLayout(), layouts: keyboardLayouts(),
+                                   exceptions: exceptions, learned: wordSet(learnedFile),
+                                   fixShortWords: defaults.object(forKey: "oneLetterWords") as? Bool ?? true,
+                                   allowed: { [self] in !siteExcluded() }) else { return true }
+        replace(fix.stale, with: fix.text)
         post(code, flags: flags.intersection(.maskShift))
-        target.select()
-        if code == space { wordEnded = true; trailingSpaces = 1; autoSwitched = true } else { reset() }
+        fix.target?.select()
         return false
     }
 
@@ -237,19 +195,20 @@ final class Switcher: NSObject, NSApplicationDelegate, NSMenuDelegate {
 
     private func convertManually() {
         let layouts = keyboardLayouts()
-        guard !word.isEmpty, layouts.count > 1, let current = currentLayout(),
+        guard !buffer.isEmpty, layouts.count > 1, let current = currentLayout(),
               let index = layouts.firstIndex(where: { $0.id == current.id }) else { return }
         let target = layouts[(index + 1) % layouts.count]
-        let typed = current.translate(word), restored = target.translate(word)
-        replace(typed.count + trailingSpaces, with: restored + String(repeating: " ", count: trailingSpaces))
+        let typed = current.translate(buffer.keys), restored = target.translate(buffer.keys)
+        replace(typed.count + buffer.trailingSpaces,
+                with: restored + String(repeating: " ", count: buffer.trailingSpaces))
         target.select()
-        if autoSwitched {
+        if buffer.autoSwitched {
             // The user undid our autoswitch: remember the word so it never happens again.
             append(bare(restored), to: exceptionsFile)
         } else if defaults.object(forKey: "learnWords") as? Bool ?? true {
             learn(restored, insteadOf: typed)
         }
-        autoSwitched = false
+        buffer.autoSwitched = false
     }
 
     // MARK: Selection
@@ -346,14 +305,7 @@ final class Switcher: NSObject, NSApplicationDelegate, NSMenuDelegate {
         try? handle.close()
     }
 
-    @objc private func reset() {
-        word.removeAll()
-        prefix.removeAll()
-        settled = false
-        trailingSpaces = 0
-        wordEnded = false
-        autoSwitched = false
-    }
+    @objc private func reset() { buffer.reset() }
 
     // MARK: Typing
 

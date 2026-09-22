@@ -360,5 +360,41 @@ func selfTest() {
             precondition(hasInnerPunctuation(reading) || isWord(reading, lang: other.lang) != true, "built-in \(word) shadows \(reading)")
         }
     }
+    // Whole phrases through the same buffer the event tap drives: live.sh without a keyboard. The keys are the
+    // ones a US layout types; `shown` is the text left on screen, with each fix applied the way the app applies
+    // it. This is the only check of the short words fixed after the fact, and of a switch outliving its word.
+    func screen(_ phrase: String) -> String {
+        var buffer = Buffer(), shown = "", current = us
+        for char in phrase {
+            if char == " " {
+                let fix = buffer.end(space: true, current: current, layouts: [us, ru], exceptions: [],
+                                     learned: [], fixShortWords: true, allowed: { true })
+                if let fix { shown = String(shown.dropLast(fix.stale)) + fix.text }
+                shown += " "
+                if let target = fix?.target { current = target }
+                continue
+            }
+            guard let key = keys(for: String(char), in: us)?.first else { fatalError("can't type \(char)") }
+            buffer.letter(key, current: current)
+            shown += current.translate([key])
+        }
+        return shown
+    }
+    func check(_ phrase: String, _ expected: String) {
+        let shown = screen(phrase)
+        precondition(shown == expected, "typed \"\(phrase)\" -> \"\(shown)\", expected \"\(expected)\"")
+    }
+    check("ltdjgcjd ", "девопсов ")
+    check("kubectl nginx ", "kubectl nginx ")
+    check("ye ns ghbdtn ", "ну ты привет ")          // short words fixed behind the word that gave them away
+    check("z ye ghbdtn ", "я ну привет ")
+    // A word left holding a bracket: "b[" is "их". (live.sh types "dc`" for "всё", which needs Russian-PC —
+    // Apple's own Russian layout has "]" where the backtick key is.)
+    check("b[ ghbdtn ", "их привет ")
+    check("to ghbdtn ", "to привет ")                // "to" is a word in its own right, so it stays
+    check("press the ghbdtn ", "press the привет ")
+    check("hello. ye ns ghbdtn ", "hello. ну ты привет ")  // a sentence ended: "ye ns" is up for grabs again
+    check("ltdjgcjd ghbdtn ", "девопсов привет ")          // the switch stays on for the next word
+
     print("selftest ok")
 }

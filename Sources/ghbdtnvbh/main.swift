@@ -66,6 +66,8 @@ final class Switcher: NSObject, NSApplicationDelegate, NSMenuDelegate {
         add("Auto-switch", #selector(toggleEnabled), on: enabled)
         menu.addItem(.separator())
         add("Settings…", #selector(openSettings))
+        add("Check for updates…", #selector(openReleases))
+        add("About ghbdtn vbh", #selector(showAbout))
         add("Quit", #selector(NSApplication.terminate))
         menu.items.last?.target = NSApp
     }
@@ -101,6 +103,16 @@ final class Switcher: NSObject, NSApplicationDelegate, NSMenuDelegate {
 
     @objc private func openAccessibility() {
         NSWorkspace.shared.open(URL(string: "x-apple.systempreferences:com.apple.preference.security?Privacy_Accessibility")!)
+    }
+
+    /// A link in the browser, not a network call: the app itself never goes online (see README).
+    @objc private func openReleases() {
+        NSWorkspace.shared.open(URL(string: "https://github.com/mikakostoev/ghbdtn-vbh/releases")!)
+    }
+
+    @objc private func showAbout() {
+        NSApp.activate(ignoringOtherApps: true)
+        NSApp.orderFrontStandardAboutPanel(nil)
     }
 
     private func onboardingView() -> OnboardingView {

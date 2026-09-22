@@ -15,6 +15,7 @@ final class Switcher: NSObject, NSApplicationDelegate, NSMenuDelegate {
     private var tap: CFMachPort?
 
     private var settingsWindow: NSWindow?
+    private var onboardingWindow: NSWindow?
 
     private var buffer = Buffer()
     private var optionAlone = false
@@ -50,6 +51,7 @@ final class Switcher: NSObject, NSApplicationDelegate, NSMenuDelegate {
         Timer.scheduledTimer(withTimeInterval: 2, repeats: true) { [weak self] timer in
             if self?.startTap() == true { timer.invalidate(); self?.showState() }
         }.fire()
+        if tap == nil { openOnboarding() }
     }
 
     func menuNeedsUpdate(_ menu: NSMenu) {
@@ -60,10 +62,12 @@ final class Switcher: NSObject, NSApplicationDelegate, NSMenuDelegate {
             item.target = self
             item.state = on ? .on : .off
         }
-        if tap == nil { add("No access: Accessibility…", #selector(openAccessibility)) }
+        if tap == nil { add("No access: Accessibility…", #selector(openOnboarding)) }
         add("Auto-switch", #selector(toggleEnabled), on: enabled)
         menu.addItem(.separator())
         add("Settings…", #selector(openSettings))
+        add("Check for updates…", #selector(openReleases))
+        add("About ghbdtn vbh", #selector(showAbout))
         add("Quit", #selector(NSApplication.terminate))
         menu.items.last?.target = NSApp
     }
@@ -101,6 +105,38 @@ final class Switcher: NSObject, NSApplicationDelegate, NSMenuDelegate {
         NSWorkspace.shared.open(URL(string: "x-apple.systempreferences:com.apple.preference.security?Privacy_Accessibility")!)
     }
 
+    /// A link in the browser, not a network call: the app itself never goes online (see README).
+    @objc private func openReleases() {
+        NSWorkspace.shared.open(URL(string: "https://github.com/mikakostoev/ghbdtn-vbh/releases")!)
+    }
+
+    @objc private func showAbout() {
+        NSApp.activate(ignoringOtherApps: true)
+        NSApp.orderFrontStandardAboutPanel(nil)
+    }
+
+    private func onboardingView() -> OnboardingView {
+        OnboardingView(afterUpdate: defaults.bool(forKey: "onboarded"),
+                       openAccessibility: { [weak self] in self?.openAccessibility() },
+                       close: { [weak self] in self?.onboardingWindow?.close() })
+    }
+
+    @objc private func openOnboarding() {
+        if onboardingWindow == nil {
+            let window = NSWindow(contentViewController: NSHostingController(rootView: onboardingView()))
+            window.title = "ghbdtn vbh"
+            window.styleMask = [.titled, .closable]
+            window.isReleasedWhenClosed = false
+            onboardingWindow = window
+        } else {
+            // Re-host: a stale afterUpdate/sample from the first open must not survive a reopen.
+            onboardingWindow?.contentViewController = NSHostingController(rootView: onboardingView())
+        }
+        onboardingWindow?.center()
+        onboardingWindow?.makeKeyAndOrderFront(nil)
+        NSApp.activate(ignoringOtherApps: true)
+    }
+
     // MARK: Event tap
 
     private func startTap() -> Bool {
@@ -111,6 +147,7 @@ final class Switcher: NSObject, NSApplicationDelegate, NSMenuDelegate {
             switcher.handle(type, event) ? Unmanaged.passUnretained(event) : nil
         }, userInfo: nil) else { return false }
         CFRunLoopAddSource(CFRunLoopGetMain(), CFMachPortCreateRunLoopSource(nil, tap, 0), .commonModes)
+        defaults.set(true, forKey: "onboarded")  // the "after an update" text is for Macs that got this far once
         self.tap = tap
         return true
     }

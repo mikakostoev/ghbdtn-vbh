@@ -1,7 +1,7 @@
 import AppKit
 import Carbon
 // Tiny pad for Tests/live.sh: a text view with every substitution off; types the cases given as arguments into itself
-// by key code, so the running LayoutSwitcher sees them as real typing, and prints what ended up in the view.
+// by key code, so the running ghbdtn vbh sees them as real typing, and prints what ended up in the view.
 let codes: [Character: UInt16] = ["a":0,"s":1,"d":2,"f":3,"h":4,"g":5,"z":6,"x":7,"c":8,"v":9,"b":11,"q":12,"w":13,"e":14,"r":15,"y":16,"t":17,"o":31,"u":32,"i":34,"p":35,"l":37,"j":38,"k":40,"n":45,"m":46," ":49,"`":50,",":43,".":47]
 func layout(_ id: String) -> TISInputSource? {
     (TISCreateInputSourceList([kTISPropertyInputSourceID: id] as CFDictionary, false).takeRetainedValue() as? [TISInputSource])?.first
@@ -14,7 +14,7 @@ let view = NSTextView(frame: window.contentView!.bounds)
 view.isAutomaticSpellingCorrectionEnabled = false; view.isAutomaticTextReplacementEnabled = false
 view.isAutomaticQuoteSubstitutionEnabled = false; view.isAutomaticDashSubstitutionEnabled = false
 view.isContinuousSpellCheckingEnabled = false; view.isAutomaticTextCompletionEnabled = false
-window.contentView!.addSubview(view); window.title = "LayoutSwitcher test pad"
+window.contentView!.addSubview(view); window.title = "ghbdtn vbh test pad"
 // FRAMES=dir: bigger type, and a PNG of the view every 40 ms — Tools/demo.sh turns them into the README gif.
 if let dir = ProcessInfo.processInfo.environment["FRAMES"] {
     view.font = .systemFont(ofSize: 30); view.textContainerInset = NSSize(width: 20, height: 40)

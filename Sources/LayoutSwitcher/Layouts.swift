@@ -258,6 +258,8 @@ func selfTest() {
     try! FileManager.default.removeItem(at: file)
     precondition(wordSet(file).isEmpty)
 
+    // Which languages the speller knows differs between Macs; a CI log needs to say what it was judging with.
+    print("spellers:", NSSpellChecker.shared.availableLanguages.sorted().joined(separator: " "))
     let all = keyboardLayouts(installed: true)
     guard let us = all.first(where: { $0.id == "com.apple.keylayout.US" }),
           let ru = all.first(where: { $0.id == "com.apple.keylayout.Russian" }) else { fatalError("US/Russian layouts not installed") }

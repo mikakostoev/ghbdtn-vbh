@@ -118,7 +118,13 @@ final class Switcher: NSObject, NSApplicationDelegate, NSMenuDelegate {
     private func onboardingView() -> OnboardingView {
         OnboardingView(afterUpdate: defaults.bool(forKey: "onboarded"),
                        openAccessibility: { [weak self] in self?.openAccessibility() },
-                       close: { [weak self] in self?.onboardingWindow?.close() })
+                       close: { [weak self] in
+                           // Drop the hosting controller too, or its Timer.publish keeps polling
+                           // AXIsProcessTrusted() for the life of the process — the window itself is kept
+                           // alive (isReleasedWhenClosed = false) so closing it alone doesn't stop the timer.
+                           self?.onboardingWindow?.close()
+                           self?.onboardingWindow?.contentViewController = nil
+                       })
     }
 
     @objc private func openOnboarding() {

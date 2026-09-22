@@ -288,9 +288,14 @@ final class Switcher: NSObject, NSApplicationDelegate, NSMenuDelegate {
     /// Host of the page being typed into. Browsers and Electron apps expose it as the URL of the web area;
     /// the outermost one wins, so an embedded frame counts as the site it sits on.
     private func currentSite() -> String? {
+        // A hung app takes the full messaging timeout per call and the walk makes three of them per level,
+        // so the depth alone is no bound: without a budget one space could hold the keyboard for a minute.
+        // Out of time we answer with the outermost web area reached so far, exactly as a shallow tree would.
+        let deadline = ProcessInfo.processInfo.systemUptime + 0.05
         var element = axValue(AXUIElementCreateSystemWide(), kAXFocusedUIElementAttribute), host: String?
         for _ in 0..<100 {
-            guard let current = element, CFGetTypeID(current) == AXUIElementGetTypeID() else { break }
+            guard let current = element, CFGetTypeID(current) == AXUIElementGetTypeID(),
+                  ProcessInfo.processInfo.systemUptime < deadline else { break }
             if axValue(current as! AXUIElement, kAXRoleAttribute) as? String == "AXWebArea",
                let url = axValue(current as! AXUIElement, kAXURLAttribute) as? URL { host = url.host ?? host }
             element = axValue(current as! AXUIElement, kAXParentAttribute)

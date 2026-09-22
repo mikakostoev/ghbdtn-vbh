@@ -3,6 +3,8 @@
 "Auto-switch" = "Автопереключение";
 "No access: Accessibility…" = "Нет доступа: Универсальный доступ…";
 "Settings…" = "Настройки…";
+"Check for updates…" = "Проверить обновления…";
+"About ghbdtn vbh" = "О программе ghbdtn vbh";
 "Quit" = "Выйти";
 "ghbdtn vbh: no Accessibility access" = "ghbdtn vbh: нет доступа к Универсальному доступу";
 "ghbdtn vbh: auto-switching is off" = "ghbdtn vbh: автопереключение выключено";
@@ -26,3 +28,11 @@
 "Remove" = "Убрать";
 "Add app…" = "Добавить приложение…";
 "The layout is never switched by itself on these sites — one per line: github.com" = "На этих сайтах раскладка не переключается сама — по одному в строке: github.com";
+
+"To fix the layout, the app has to see what you type. Allow it under Accessibility." = "Чтобы исправлять раскладку, приложению нужно видеть, что вы печатаете. Разрешите это в Универсальном доступе.";
+"The update changed the app's signature and macOS forgot the permission. Untick ghbdtn vbh in the list and tick it again." = "Обновление сменило подпись приложения, и macOS забыла разрешение. Снимите галочку у ghbdtn vbh в списке и поставьте снова.";
+"Open Accessibility settings" = "Открыть Универсальный доступ";
+"Waiting for permission…" = "Ждём разрешения…";
+"Access granted" = "Доступ есть";
+"Try it: type ghbdtn vbh and press space" = "Попробуйте: наберите ghbdtn vbh и нажмите пробел";
+"Done" = "Готово";

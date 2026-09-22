@@ -4,7 +4,7 @@ set -e
 cd "$(dirname "$0")"
 xcrun --sdk macosx --show-sdk-path >/dev/null 2>&1 || export DEVELOPER_DIR=/Library/Developer/CommandLineTools
 swift build -c release 2>&1 | tail -1
-BIN=.build/release/LayoutSwitcher
+BIN=.build/release/ghbdtnvbh
 $BIN --selftest
 # Everyday chat, work talk and a bit of code: not one false switch is allowed (exits 1 otherwise).
 # Baseline 2026-09-21: 0 false; 10 + 10 missed, all of them 2-3 letter words. Decisions are sub-millisecond

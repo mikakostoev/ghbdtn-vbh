@@ -12,6 +12,6 @@ jobs:
   selftest:
     runs-on: macos-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - run: swift build -c release
       - run: .build/release/LayoutSwitcher --selftest

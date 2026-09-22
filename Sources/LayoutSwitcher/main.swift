@@ -55,15 +55,16 @@ final class Switcher: NSObject, NSApplicationDelegate, NSMenuDelegate {
     func menuNeedsUpdate(_ menu: NSMenu) {
         menu.removeAllItems()
         func add(_ title: String, _ action: Selector, on: Bool = false) {
-            let item = menu.addItem(withTitle: title, action: action, keyEquivalent: "")
+            // The tables are written by hand, so a plain lookup does; the keys are the English strings.
+            let item = menu.addItem(withTitle: NSLocalizedString(title, comment: ""), action: action, keyEquivalent: "")
             item.target = self
             item.state = on ? .on : .off
         }
-        if tap == nil { add("Нет доступа: Универсальный доступ…", #selector(openAccessibility)) }
-        add("Автопереключение", #selector(toggleEnabled), on: enabled)
+        if tap == nil { add("No access: Accessibility…", #selector(openAccessibility)) }
+        add("Auto-switch", #selector(toggleEnabled), on: enabled)
         menu.addItem(.separator())
-        add("Настройки…", #selector(openSettings))
-        add("Выйти", #selector(NSApplication.terminate))
+        add("Settings…", #selector(openSettings))
+        add("Quit", #selector(NSApplication.terminate))
         menu.items.last?.target = NSApp
     }
 
@@ -76,8 +77,8 @@ final class Switcher: NSObject, NSApplicationDelegate, NSMenuDelegate {
     /// cases the user has to act on don't look exactly like the working one.
     private func showState() {
         statusItem.button?.appearsDisabled = !enabled || tap == nil
-        statusItem.button?.toolTip = tap == nil ? "LayoutSwitcher: нет доступа к Универсальному доступу"
-            : enabled ? "LayoutSwitcher" : "LayoutSwitcher: автопереключение выключено"
+        statusItem.button?.toolTip = tap == nil ? NSLocalizedString("LayoutSwitcher: no Accessibility access", comment: "")
+            : enabled ? "LayoutSwitcher" : NSLocalizedString("LayoutSwitcher: auto-switching is off", comment: "")
     }
 
     @objc private func openSettings() {

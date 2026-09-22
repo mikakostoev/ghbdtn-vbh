@@ -57,18 +57,18 @@ struct SettingsView: View {
     var body: some View {
         TabView {
             Form {
-                Toggle("Автоматически переключать раскладку", isOn: $enabled)
-                Toggle("Исправлять короткие слова перед переключённым (я, ну, мы, the…)", isOn: $oneLetterWords)
-                Toggle("Конвертировать последнее слово или выделенный текст по Option", isOn: $manualConvert)
-                Picker("Нажатие Option", selection: $convertTrigger) {
-                    Text("Одиночное").tag("single")
-                    Text("Двойное").tag("double")
+                Toggle("Switch the layout automatically", isOn: $enabled)
+                Toggle("Fix short words before a switched one (я, ну, мы, the…)", isOn: $oneLetterWords)
+                Toggle("Convert the last word or the selection with Option", isOn: $manualConvert)
+                Picker("Option press", selection: $convertTrigger) {
+                    Text("Single").tag("single")
+                    Text("Double").tag("double")
                 }
                 .pickerStyle(.segmented)
                 .disabled(!manualConvert)
-                Toggle("Запоминать слова, сконвертированные вручную", isOn: $learnWords)
+                Toggle("Remember words converted by hand", isOn: $learnWords)
                     .disabled(!manualConvert)
-                Toggle("Запускать при входе в систему", isOn: $launchAtLogin)
+                Toggle("Open at login", isOn: $launchAtLogin)
                     .onChange(of: launchAtLogin) { on in
                         do { try on ? SMAppService.mainApp.register() : SMAppService.mainApp.unregister() } catch {
                             NSAlert(error: error).runModal()
@@ -77,16 +77,16 @@ struct SettingsView: View {
                     }
             }
             .padding()
-            .tabItem { Text("Основные") }
+            .tabItem { Text("General") }
 
             VStack(alignment: .leading) {
-                Text("Эти слова не переключаются автоматически — по одному в строке.")
+                Text("These words are never switched automatically — one per line.")
                     .foregroundStyle(.secondary)
                 TextEditor(text: $words)
                     .font(.body.monospaced())
                     .border(.separator)
                     .onChange(of: words) { try? $0.write(to: exceptionsFile, atomically: true, encoding: .utf8) }
-                Text("Выученные слова: их нет в словаре, но вы конвертировали их вручную — теперь они переключаются сами.")
+                Text("Learned words: no dictionary knows them, but you converted them by hand, so now they switch by themselves.")
                     .foregroundStyle(.secondary)
                 TextEditor(text: $learned)
                     .font(.body.monospaced())
@@ -94,21 +94,21 @@ struct SettingsView: View {
                     .onChange(of: learned) { try? $0.write(to: learnedFile, atomically: true, encoding: .utf8) }
             }
             .padding()
-            .tabItem { Text("Слова") }
+            .tabItem { Text("Words") }
 
             VStack(alignment: .leading) {
-                Text("В этих приложениях переключатель не работает.")
+                Text("The switcher is off in these apps.")
                     .foregroundStyle(.secondary)
                 List(apps, id: \.self) { id in
                     HStack {
                         Text(appName(id))
                         Spacer()
-                        Button("Убрать") { apps.removeAll { $0 == id } }
+                        Button("Remove") { apps.removeAll { $0 == id } }
                     }
                 }
                 .border(.separator)
-                Button("Добавить приложение…", action: addApp)
-                Text("На этих сайтах раскладка не переключается сама — по одному в строке: github.com")
+                Button("Add app…", action: addApp)
+                Text("The layout is never switched by itself on these sites — one per line: github.com")
                     .foregroundStyle(.secondary)
                 TextEditor(text: $sites)
                     .font(.body.monospaced())
@@ -117,7 +117,7 @@ struct SettingsView: View {
             }
             .padding()
             .onChange(of: apps) { UserDefaults.standard.set($0, forKey: "excludedApps") }
-            .tabItem { Text("Приложения и сайты") }
+            .tabItem { Text("Apps and sites") }
         }
         .padding()
         .frame(width: 480, height: 420)

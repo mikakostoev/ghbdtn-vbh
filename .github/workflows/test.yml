@@ -13,8 +13,9 @@ jobs:
     runs-on: macos-latest
     steps:
       - uses: actions/checkout@v5
+      # The self-test runs from a debug build: a failed precondition then names its line, which release strips.
+      - run: swift build && .build/debug/LayoutSwitcher --selftest
       - run: swift build -c release
-      - run: .build/release/LayoutSwitcher --selftest
       # Everyday texts: not one false switch is allowed. The rare-word run is for the log only.
       - run: .build/release/LayoutSwitcher --eval --layouts US,Russian Tests/chat-ru.txt Tests/chat-en.txt
       - run: .build/release/LayoutSwitcher --eval --layouts US,Russian Tests/stress-ru.txt Tests/stress-en.txt || true

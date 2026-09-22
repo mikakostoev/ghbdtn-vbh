@@ -41,7 +41,8 @@ attaches it to the GitHub release, and the cask workflow points `Casks/ghbdtn-vb
 ad-hoc-signed until `DEVELOPER_ID_P12` is set; once it is, the other four secrets listed at the top of
 `.github/workflows/release.yml` must be set too, or the run fails — with all five, the same tag comes out
 signed with a Developer ID, notarized and stapled, and macOS opens it without "Open Anyway". Nothing in the
-app changes either way.
+app changes either way. When those secrets are added, the first-launch/"Open Anyway" notes in `README.md` and
+in `docs/index.html` and `docs/ru/index.html` need updating too — they currently say the app is unsigned.
 
 ## How the code is laid out
 

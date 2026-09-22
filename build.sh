@@ -54,5 +54,9 @@ PLIST
 # and stays: it lives in developers' keychains.
 IDENTITY="${IDENTITY:-LayoutSwitcher Local Signing}"
 [ "$IDENTITY" = - ] || security find-identity -p codesigning | grep -q "\"$IDENTITY\"" || { echo "No '$IDENTITY' certificate, signing ad-hoc"; IDENTITY=-; }
-codesign --force -s "$IDENTITY" "$BUNDLE"
+# Notarization wants the hardened runtime and a secure timestamp; an event tap and Accessibility need no
+# entitlements under it. Only for a real Developer ID: the timestamp server is a network call, and a local
+# self-signed build should work offline.
+case "$IDENTITY" in "Developer ID"*) SIGN_FLAGS="--options runtime --timestamp";; *) SIGN_FLAGS="";; esac
+codesign --force $SIGN_FLAGS -s "$IDENTITY" "$BUNDLE"
 echo "Built $BUNDLE"

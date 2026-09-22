@@ -5,9 +5,9 @@
 set -e
 cd "$(dirname "$0")"
 xcrun --sdk macosx --show-sdk-path >/dev/null 2>&1 || export DEVELOPER_DIR=/Library/Developer/CommandLineTools
-OUT="${TMPDIR:-/tmp}/layoutswitcher-pad"
+OUT="${TMPDIR:-/tmp}/ghbdtnvbh-pad"
 swiftc -O -sdk "$(xcrun --sdk macosx --show-sdk-path)" pad.swift -o "$OUT"
-pgrep -f "LayoutSwitcher.app/Contents/MacOS/LayoutSwitcher" >/dev/null || { echo "LayoutSwitcher is not running"; exit 1; }
+pgrep -f "ghbdtn vbh.app/Contents/MacOS/ghbdtnvbh" >/dev/null || { echo "ghbdtn vbh is not running"; exit 1; }
 if [ $# -eq 0 ]; then
   # Expected: ну ты привет | press the привет | hello. ну ты привет | я ну привет | to привет | всё привет | девопсов | kubectl nginx
   set -- 'ye ns ghbdtn ' 'press the ghbdtn ' 'hello. ye ns ghbdtn ' 'z ye ghbdtn ' 'to ghbdtn ' 'dc` ghbdtn ' 'ltdjgcjd ' 'kubectl nginx '

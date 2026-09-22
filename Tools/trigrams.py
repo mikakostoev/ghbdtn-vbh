@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Regenerates Sources/LayoutSwitcher/Trigrams.swift. Run from the project root after downloading the lists,
+"""Regenerates Sources/ghbdtnvbh/Trigrams.swift. Run from the project root after downloading the lists,
 which stay out of the repository (.gitignore):
   for l in ru en uk de …; do curl -LO https://raw.githubusercontent.com/hermitdave/FrequencyWords/master/content/2018/$l/${l}_50k.txt; done
   python3 Tools/trigrams.py
@@ -57,4 +57,4 @@ for spec in LANGS.split():
     print(lang, n, floor, ''.join(sorted(alpha)), one_letter(words, alpha))
     tables += f'    "{lang}": (unseen: {floor}, triplets: """\n' + textwrap.indent(textwrap.fill(t, 112), '        ') + '\n        """),\n'
     ones += f'    "{lang}": Set("{one_letter(words, alpha)}"),\n'
-open('Sources/LayoutSwitcher/Trigrams.swift', 'w', encoding='utf-8').write(tables + ']\n\n' + ones + ']\n')
+open('Sources/ghbdtnvbh/Trigrams.swift', 'w', encoding='utf-8').write(tables + ']\n\n' + ones + ']\n')

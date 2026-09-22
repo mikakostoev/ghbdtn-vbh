@@ -3,8 +3,12 @@ import SwiftUI
 import UniformTypeIdentifiers
 
 private func appFile(_ name: String) -> URL {
-    let dir = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0]
-        .appendingPathComponent("LayoutSwitcher")
+    let support = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0]
+    let dir = support.appendingPathComponent("ghbdtn vbh"), old = support.appendingPathComponent("LayoutSwitcher")
+    // The app was called LayoutSwitcher up to 1.1: the three files move over once, the first time 2.0 runs.
+    if !FileManager.default.fileExists(atPath: dir.path), FileManager.default.fileExists(atPath: old.path) {
+        try? FileManager.default.moveItem(at: old, to: dir)
+    }
     try? FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
     let file = dir.appendingPathComponent(name)
     if !FileManager.default.fileExists(atPath: file.path) { FileManager.default.createFile(atPath: file.path, contents: nil) }

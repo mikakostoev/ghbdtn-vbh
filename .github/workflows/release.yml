@@ -17,7 +17,7 @@ jobs:
       - uses: actions/checkout@v5
       - run: ./release.sh "${GITHUB_REF_NAME#v}"
       - run: |
-          gh release upload "$GITHUB_REF_NAME" dist/LayoutSwitcher-*.zip --clobber ||
-          gh release create "$GITHUB_REF_NAME" dist/LayoutSwitcher-*.zip --title "LayoutSwitcher ${GITHUB_REF_NAME#v}" --generate-notes
+          gh release upload "$GITHUB_REF_NAME" dist/ghbdtn-vbh-*.zip --clobber ||
+          gh release create "$GITHUB_REF_NAME" dist/ghbdtn-vbh-*.zip --title "ghbdtn vbh ${GITHUB_REF_NAME#v}" --generate-notes
         env:
           GH_TOKEN: ${{ github.token }}

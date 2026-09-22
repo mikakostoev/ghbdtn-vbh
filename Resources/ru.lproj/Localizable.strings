@@ -4,8 +4,8 @@
 "No access: Accessibility…" = "Нет доступа: Универсальный доступ…";
 "Settings…" = "Настройки…";
 "Quit" = "Выйти";
-"LayoutSwitcher: no Accessibility access" = "LayoutSwitcher: нет доступа к Универсальному доступу";
-"LayoutSwitcher: auto-switching is off" = "LayoutSwitcher: автопереключение выключено";
+"ghbdtn vbh: no Accessibility access" = "ghbdtn vbh: нет доступа к Универсальному доступу";
+"ghbdtn vbh: auto-switching is off" = "ghbdtn vbh: автопереключение выключено";
 
 "Switch the layout automatically" = "Автоматически переключать раскладку";
 "Fix short words before a switched one (я, ну, мы, the…)" = "Исправлять короткие слова перед переключённым (я, ну, мы, the…)";

@@ -20,6 +20,16 @@ else
     swift build -c release
     cp "$(swift build -c release --show-bin-path)/LayoutSwitcher" "$APP/MacOS/"
 fi
+# App icon: drawn by Tools/icon.swift so the repository keeps no binary, and redrawn when that file changes.
+ICON=.build/icon
+if [ ! -f "$ICON.icns" ] || [ Tools/icon.swift -nt "$ICON.icns" ]; then
+    mkdir -p .build
+    swiftc -O -sdk "$(xcrun --sdk macosx --show-sdk-path)" Tools/icon.swift -o "$ICON-tool"
+    "$ICON-tool" "$ICON.iconset" >/dev/null
+    iconutil -c icns "$ICON.iconset" -o "$ICON.icns"
+fi
+mkdir -p "$APP/Resources"
+cp "$ICON.icns" "$APP/Resources/LayoutSwitcher.icns"
 cat > "$APP/Info.plist" <<PLIST
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
@@ -27,6 +37,7 @@ cat > "$APP/Info.plist" <<PLIST
 <key>CFBundleIdentifier</key><string>local.layoutswitcher</string>
 <key>CFBundleName</key><string>LayoutSwitcher</string>
 <key>CFBundleExecutable</key><string>LayoutSwitcher</string>
+<key>CFBundleIconFile</key><string>LayoutSwitcher</string>
 <key>CFBundlePackageType</key><string>APPL</string>
 <key>CFBundleShortVersionString</key><string>${VERSION:-1.0}</string>
 <key>LSMinimumSystemVersion</key><string>13.0</string>

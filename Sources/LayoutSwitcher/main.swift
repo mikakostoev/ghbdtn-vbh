@@ -225,9 +225,10 @@ final class Switcher: NSObject, NSApplicationDelegate, NSMenuDelegate {
             item.types.compactMap { type in item.data(forType: type).map { (type, $0) } }
         }
         post(8, flags: .maskCommand)  // Cmd+C
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) { [self] in
+        // Poll rather than wait a fixed 200 ms: a quick app answers in one tick, a busy one still gets a second.
+        copied(pasteboard, since: before, deadline: .now() + 1) { [self] changed in
             copying = false
-            guard pasteboard.changeCount != before else { return }  // nothing was selected
+            guard changed else { return }  // nothing was selected
             let text = pasteboard.string(forType: .string)
             pasteboard.clearContents()
             pasteboard.writeObjects(saved.map { types in
@@ -236,6 +237,15 @@ final class Switcher: NSObject, NSApplicationDelegate, NSMenuDelegate {
                 return item
             })
             if let text { retype(text) }
+        }
+    }
+
+    private func copied(_ pasteboard: NSPasteboard, since before: Int, deadline: DispatchTime,
+                        then done: @escaping (Bool) -> Void) {
+        if pasteboard.changeCount != before { return done(true) }
+        if .now() >= deadline { return done(false) }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.02) { [self] in
+            copied(pasteboard, since: before, deadline: deadline, then: done)
         }
     }
 

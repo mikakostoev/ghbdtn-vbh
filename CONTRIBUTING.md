@@ -38,10 +38,10 @@ leave a comment saying you took it.
 
 `git tag v2.1.0 && git push origin v2.1.0`. The release workflow builds the universal zip with `release.sh`,
 attaches it to the GitHub release, and the cask workflow points `Casks/ghbdtn-vbh.rb` at it. The build is
-ad-hoc-signed until all five signing secrets listed at the top of `.github/workflows/release.yml` exist in the
-repository (partial secrets fail the run rather than falling back to ad-hoc); with them the same tag comes out
-signed with a Developer ID, notarized and stapled, and macOS opens it without "Open Anyway". Nothing in the app
-changes either way.
+ad-hoc-signed until `DEVELOPER_ID_P12` is set; once it is, the other four secrets listed at the top of
+`.github/workflows/release.yml` must be set too, or the run fails — with all five, the same tag comes out
+signed with a Developer ID, notarized and stapled, and macOS opens it without "Open Anyway". Nothing in the
+app changes either way.
 
 ## How the code is laid out
 

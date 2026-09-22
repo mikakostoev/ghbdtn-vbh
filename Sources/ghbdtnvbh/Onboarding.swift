@@ -16,17 +16,17 @@ struct OnboardingView: View {
         VStack(spacing: 16) {
             Image(nsImage: NSApp.applicationIconImage).resizable().frame(width: 96, height: 96)
             Text("ghbdtn vbh").font(.title.bold())
-            Text(NSLocalizedString(afterUpdate
-                ? "The update changed the app's signature and macOS forgot the permission. Untick ghbdtn vbh in the list and tick it again."
-                : "To fix the layout, the app has to see what you type. Allow it under Accessibility.", comment: ""))
-                .multilineTextAlignment(.center)
-                .fixedSize(horizontal: false, vertical: true)
             if granted {
                 Label("Access granted", systemImage: "checkmark.circle.fill").foregroundStyle(.green)
                 Text("Try it: type ghbdtn vbh and press space").foregroundStyle(.secondary)
                 TextField("", text: $sample).textFieldStyle(.roundedBorder).frame(width: 260)
                 Button("Done", action: close).keyboardShortcut(.defaultAction)
             } else {
+                Text(NSLocalizedString(afterUpdate
+                    ? "The update changed the app's signature and macOS forgot the permission. Untick ghbdtn vbh in the list and tick it again."
+                    : "To fix the layout, the app has to see what you type. Allow it under Accessibility.", comment: ""))
+                    .multilineTextAlignment(.center)
+                    .fixedSize(horizontal: false, vertical: true)
                 Button("Open Accessibility settings", action: openAccessibility).keyboardShortcut(.defaultAction)
                 Label("Waiting for permission…", systemImage: "hourglass").foregroundStyle(.secondary)
             }

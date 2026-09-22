@@ -34,7 +34,7 @@ final class Switcher: NSObject, NSApplicationDelegate, NSMenuDelegate {
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         // An image, not the "⌨︎" glyph: only an image can be dimmed to show the switcher is doing nothing.
-        statusItem.button?.image = NSImage(systemSymbolName: "keyboard", accessibilityDescription: "LayoutSwitcher")
+        statusItem.button?.image = NSImage(systemSymbolName: "keyboard", accessibilityDescription: "ghbdtn vbh")
         statusItem.button?.image?.isTemplate = true
         showState()
         let menu = NSMenu()
@@ -77,14 +77,14 @@ final class Switcher: NSObject, NSApplicationDelegate, NSMenuDelegate {
     /// cases the user has to act on don't look exactly like the working one.
     private func showState() {
         statusItem.button?.appearsDisabled = !enabled || tap == nil
-        statusItem.button?.toolTip = tap == nil ? NSLocalizedString("LayoutSwitcher: no Accessibility access", comment: "")
-            : enabled ? "LayoutSwitcher" : NSLocalizedString("LayoutSwitcher: auto-switching is off", comment: "")
+        statusItem.button?.toolTip = tap == nil ? NSLocalizedString("ghbdtn vbh: no Accessibility access", comment: "")
+            : enabled ? "ghbdtn vbh" : NSLocalizedString("ghbdtn vbh: auto-switching is off", comment: "")
     }
 
     @objc private func openSettings() {
         if settingsWindow == nil {
             let window = NSWindow(contentViewController: NSHostingController(rootView: SettingsView()))
-            window.title = "LayoutSwitcher"
+            window.title = "ghbdtn vbh"
             window.styleMask = [.titled, .closable]
             window.isReleasedWhenClosed = false
             settingsWindow = window

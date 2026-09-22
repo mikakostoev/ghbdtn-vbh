@@ -103,16 +103,22 @@ final class Switcher: NSObject, NSApplicationDelegate, NSMenuDelegate {
         NSWorkspace.shared.open(URL(string: "x-apple.systempreferences:com.apple.preference.security?Privacy_Accessibility")!)
     }
 
+    private func onboardingView() -> OnboardingView {
+        OnboardingView(afterUpdate: defaults.bool(forKey: "onboarded"),
+                       openAccessibility: { [weak self] in self?.openAccessibility() },
+                       close: { [weak self] in self?.onboardingWindow?.close() })
+    }
+
     @objc private func openOnboarding() {
         if onboardingWindow == nil {
-            let view = OnboardingView(afterUpdate: defaults.bool(forKey: "onboarded"),
-                                      openAccessibility: { [weak self] in self?.openAccessibility() },
-                                      close: { [weak self] in self?.onboardingWindow?.close() })
-            let window = NSWindow(contentViewController: NSHostingController(rootView: view))
+            let window = NSWindow(contentViewController: NSHostingController(rootView: onboardingView()))
             window.title = "ghbdtn vbh"
             window.styleMask = [.titled, .closable]
             window.isReleasedWhenClosed = false
             onboardingWindow = window
+        } else {
+            // Re-host: a stale afterUpdate/sample from the first open must not survive a reopen.
+            onboardingWindow?.contentViewController = NSHostingController(rootView: onboardingView())
         }
         onboardingWindow?.center()
         onboardingWindow?.makeKeyAndOrderFront(nil)

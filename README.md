@@ -8,6 +8,19 @@
 *A keyboard layout auto-switcher for macOS (Russian ⇄ English and any other pair of layouts). Free, open source,
 zero telemetry: the app contains no networking code at all.*
 
+![Набрано ghbdtn rfr ltkf hello — на экране «привет как дела hello»](.github/demo.gif)
+
+## Быстрый старт
+
+1. Установить: `brew tap mikakostoev/layout-switcher https://github.com/mikakostoev/layout-switcher && brew install --cask --no-quarantine layoutswitcher`
+   — или скачать zip со страницы [Releases](https://github.com/mikakostoev/layout-switcher/releases) и перенести
+   `LayoutSwitcher.app` в «Программы».
+2. Запустить и выдать доступ в «Системные настройки → Конфиденциальность и безопасность → Универсальный доступ».
+   Приложение из zip (или из brew без `--no-quarantine`) macOS сначала остановит — там же нажмите «Всё равно открыть».
+3. В любом окне набрать `ghbdtn` и пробел. Двойной Option переключает последнее слово вручную.
+
+Подробности про установку и сборку — [ниже](#установка), про то, как помочь проекту, — в [CONTRIBUTING.md](CONTRIBUTING.md).
+
 ## Почему ему можно доверять клавиатуру
 
 Переключатель раскладки видит всё, что вы печатаете, — иначе он не может работать. Поэтому вопрос не в обещаниях,
@@ -53,8 +66,8 @@ zero telemetry: the app contains no networking code at all.*
 ⁴ [Caramba Apps — Privacy Policy](https://caramba-apps.com/privacy/) (общая для приложений разработчика).
 
 Чего у нас **нет**, а у них есть: версии для Windows, работы через RDP и в виртуальных машинах, исправления
-опечаток, многолетней обкатки на миллионах пользователей. Статистика буквосочетаний пока есть только для русского
-и английского; остальные раскладки (немецкая с умляутами и т. д.) работают через системный словарь.
+опечаток, многолетней обкатки на миллионах пользователей. Статистика буквосочетаний пока есть только для русского,
+английского и украинского; остальные раскладки (немецкая с умляутами и т. д.) работают через системный словарь.
 
 ## Что умеет
 
@@ -79,13 +92,19 @@ zero telemetry: the app contains no networking code at all.*
 - 5 700 редких слов и имён из субтитров: 3 ложных переключения.
 - Решение принимается в памяти и почти всегда занимает меньше миллисекунды: в тяжёлом прогоне на 11 000
   решений дольше 10 мс оказываются единицы, и то за счёт системного словаря, который изредка задумывается.
-- Самотест гоняется на чистой macOS при каждом изменении — бейдж вверху. Кроме правил переключения он
-  проигрывает целые фразы: то же, что `Tests/live.sh` делает живым набором, только без клавиатуры.
+- Самотест и прогон повседневных текстов идут на чистой macOS при каждом изменении — бейдж вверху: коммит,
+  добавивший хоть одно ложное переключение, не пройдёт. Кроме правил переключения самотест проигрывает целые
+  фразы: то же, что `Tests/live.sh` делает живым набором, только без клавиатуры.
 
 ## Установка
 
 Скачайте `LayoutSwitcher-….zip` со страницы [Releases](https://github.com/mikakostoev/layout-switcher/releases),
 распакуйте и перенесите `LayoutSwitcher.app` в «Программы». Сборка универсальная (Apple silicon и Intel), macOS 13+.
+Zip собирает [GitHub Actions](https://github.com/mikakostoev/layout-switcher/actions/workflows/release.yml) из
+кода под тегом релиза тем же `release.sh`, что лежит в репозитории, — не чей-то Мак.
+Через Homebrew: `brew tap mikakostoev/layout-switcher https://github.com/mikakostoev/layout-switcher`, затем
+`brew install --cask --no-quarantine layoutswitcher` (без `--no-quarantine` первый запуск потребует
+«Всё равно открыть», как описано ниже).
 
 Приложение не подписано Apple Developer ID (это 99 $ в год), поэтому при первом запуске macOS его остановит.
 Откройте «Системные настройки → Конфиденциальность и безопасность» и нажмите «Всё равно открыть» рядом с
@@ -109,7 +128,7 @@ open LayoutSwitcher.app
 
 Чтобы доступ не слетал после каждой пересборки, создайте самоподписанный сертификат для подписи кода с именем
 `LayoutSwitcher Local Signing` (Связка ключей → Ассистент сертификации); без него сборка подписывается ad-hoc.
-`./release.sh 1.1.0` собирает универсальный zip для Releases.
+`./release.sh 1.1.0` собирает универсальный zip; тег `v1.1.0` на GitHub делает то же самое и прикладывает его к релизу.
 
 Проверки: `./test.sh` (сборка, самотест, оценка на текстах) и `Tests/live.sh` (живой набор в тестовое окно,
 на несколько секунд занимает клавиатуру).
@@ -117,4 +136,4 @@ open LayoutSwitcher.app
 ## Лицензия
 
 Код — [MIT](LICENSE). Таблица частот `Trigrams.swift` и списки `Tests/stress-*.txt` получены из
-[FrequencyWords](https://github.com/hermitdave/FrequencyWords) и распространяются под CC BY-SA 4.0.
+[FrequencyWords](https://github.com/hermitdave/FrequencyWords) и распространяются под CC BY-SA 4.0 ([NOTICE.md](NOTICE.md)).

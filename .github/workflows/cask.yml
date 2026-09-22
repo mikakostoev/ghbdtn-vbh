@@ -1,0 +1,34 @@
+# Keeps Casks/layoutswitcher.rb pointing at the newest release: takes the zip of the release just published,
+# computes its sha256 and commits the new version and checksum to main. Listens to both a release made by hand
+# and one made by the release workflow (a release created with the workflow token fires no release event).
+name: cask
+
+on:
+  release:
+    types: [published]
+  workflow_run:
+    workflows: [release]
+    types: [completed]
+
+permissions:
+  contents: write
+
+jobs:
+  bump:
+    if: github.event_name == 'release' || github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    env:
+      TAG: ${{ github.event.release.tag_name || github.event.workflow_run.head_branch }}
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: main
+      - run: |
+          case "$TAG" in v*) ;; *) echo "not a release tag: $TAG"; exit 0;; esac
+          V="${TAG#v}"
+          curl -sSLf -o app.zip "https://github.com/$GITHUB_REPOSITORY/releases/download/$TAG/LayoutSwitcher-$V.zip"
+          SHA=$(sha256sum app.zip | cut -d' ' -f1)
+          sed -i -e "s/^  version \".*\"/  version \"$V\"/" -e "s/^  sha256 \".*\"/  sha256 \"$SHA\"/" Casks/layoutswitcher.rb
+          git config user.name github-actions
+          git config user.email github-actions[bot]@users.noreply.github.com
+          git diff --quiet || { git commit -am "Point the cask at $V" && git push; }

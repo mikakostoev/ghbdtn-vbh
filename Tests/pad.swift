@@ -15,6 +15,17 @@ view.isAutomaticSpellingCorrectionEnabled = false; view.isAutomaticTextReplaceme
 view.isAutomaticQuoteSubstitutionEnabled = false; view.isAutomaticDashSubstitutionEnabled = false
 view.isContinuousSpellCheckingEnabled = false; view.isAutomaticTextCompletionEnabled = false
 window.contentView!.addSubview(view); window.title = "LayoutSwitcher test pad"
+// FRAMES=dir: bigger type, and a PNG of the view every 40 ms — Tools/demo.sh turns them into the README gif.
+if let dir = ProcessInfo.processInfo.environment["FRAMES"] {
+    view.font = .systemFont(ofSize: 30); view.textContainerInset = NSSize(width: 20, height: 40)
+    var n = 0
+    Timer.scheduledTimer(withTimeInterval: 0.04, repeats: true) { _ in
+        guard let rep = view.bitmapImageRepForCachingDisplay(in: view.bounds) else { return }
+        view.cacheDisplay(in: view.bounds, to: rep); n += 1
+        try? rep.representation(using: .png, properties: [:])?
+            .write(to: URL(fileURLWithPath: dir).appendingPathComponent(String(format: "%04d.png", n)))
+    }
+}
 window.makeKeyAndOrderFront(nil); window.makeFirstResponder(view); app.activate(ignoringOtherApps: true)
 let source = CGEventSource(stateID: .hidSystemState)
 func press(_ code: UInt16, flags: CGEventFlags = []) {

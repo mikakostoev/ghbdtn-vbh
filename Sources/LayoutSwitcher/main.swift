@@ -38,7 +38,10 @@ final class Switcher: NSObject, NSApplicationDelegate, NSMenuDelegate {
     // MARK: App
 
     func applicationDidFinishLaunching(_ notification: Notification) {
-        statusItem.button?.title = "⌨︎"
+        // An image, not the "⌨︎" glyph: only an image can be dimmed to show the switcher is doing nothing.
+        statusItem.button?.image = NSImage(systemSymbolName: "keyboard", accessibilityDescription: "LayoutSwitcher")
+        statusItem.button?.image?.isTemplate = true
+        showState()
         let menu = NSMenu()
         menu.delegate = self
         statusItem.menu = menu
@@ -50,7 +53,7 @@ final class Switcher: NSObject, NSApplicationDelegate, NSMenuDelegate {
         AXUIElementSetMessagingTimeout(AXUIElementCreateSystemWide(), 0.3)
         AXIsProcessTrustedWithOptions([kAXTrustedCheckOptionPrompt.takeUnretainedValue(): true] as CFDictionary)
         Timer.scheduledTimer(withTimeInterval: 2, repeats: true) { [weak self] timer in
-            if self?.startTap() == true { timer.invalidate() }
+            if self?.startTap() == true { timer.invalidate(); self?.showState() }
         }.fire()
     }
 
@@ -69,7 +72,18 @@ final class Switcher: NSObject, NSApplicationDelegate, NSMenuDelegate {
         menu.items.last?.target = NSApp
     }
 
-    @objc private func toggleEnabled() { enabled.toggle() }
+    @objc private func toggleEnabled() {
+        enabled.toggle()
+        showState()
+    }
+
+    /// Dimmed whenever nothing will be switched — turned off, or no Accessibility grant — so that the two
+    /// cases the user has to act on don't look exactly like the working one.
+    private func showState() {
+        statusItem.button?.appearsDisabled = !enabled || tap == nil
+        statusItem.button?.toolTip = tap == nil ? "LayoutSwitcher: нет доступа к Универсальному доступу"
+            : enabled ? "LayoutSwitcher" : "LayoutSwitcher: автопереключение выключено"
+    }
 
     @objc private func openSettings() {
         if settingsWindow == nil {

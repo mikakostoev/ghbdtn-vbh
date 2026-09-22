@@ -259,6 +259,7 @@ func selfTest() {
     precondition(wordSet(file).isEmpty)
 
     // Which languages the speller knows differs between Macs; a CI log needs to say what it was judging with.
+    setvbuf(stdout, nil, _IONBF, 0)  // a failed precondition traps before a buffered line would be flushed
     print("spellers:", NSSpellChecker.shared.availableLanguages.sorted().joined(separator: " "))
     let all = keyboardLayouts(installed: true)
     guard let us = all.first(where: { $0.id == "com.apple.keylayout.US" }),

@@ -1,5 +1,7 @@
 # LayoutSwitcher
 
+[![test](https://github.com/mikakostoev/layout-switcher/actions/workflows/test.yml/badge.svg)](https://github.com/mikakostoev/layout-switcher/actions/workflows/test.yml)
+
 Автопереключатель раскладки для macOS: набрали `ghbdtn` — получили «привет». Бесплатный, с открытым кодом,
 и **ничего никуда не отправляет** — в программе нет ни одной строки сетевого кода.
 

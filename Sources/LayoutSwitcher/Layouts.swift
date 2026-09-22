@@ -68,12 +68,28 @@ private func isWord(_ text: String, lang: String, learned: Set<String> = [], asT
             || (asTyped && protectedWords[lang]?.contains(lower) == true)
     }
     if forms.contains(where: listed) { return true }
-    let checker = NSSpellChecker.shared
-    guard checker.availableLanguages.contains(where: { $0 == lang || $0.hasPrefix(lang + "_") }) else { return nil }
+    guard hasSpeller(lang) else { return nil }
     return ([text] + forms.dropFirst()).contains {
-        checker.checkSpelling(of: $0, startingAt: 0, language: lang, wrap: false,
-                              inSpellDocumentWithTag: 0, wordCount: nil).location == NSNotFound
+        NSSpellChecker.shared.checkSpelling(of: $0, startingAt: 0, language: lang, wrap: false,
+                                            inSpellDocumentWithTag: 0, wordCount: nil).location == NSNotFound
     }
+}
+
+/// A speller the system lists but has no dictionary for (not downloaded yet, as on a fresh CI runner) accepts
+/// anything. Each language is probed once with letters that spell nothing ("абвгдежз"); one that passes them
+/// is treated as absent, and the tables decide instead.
+private var spellers: [String: Bool] = [:]
+private func hasSpeller(_ lang: String) -> Bool {
+    if let known = spellers[lang] { return known }
+    let checker = NSSpellChecker.shared
+    var works = checker.availableLanguages.contains { $0 == lang || $0.hasPrefix(lang + "_") }
+    if works, let table = trigramTable(lang) {
+        let probe = String(Set(table.triplets.keys.joined().filter(\.isLetter)).sorted().prefix(8))
+        works = checker.checkSpelling(of: probe, startingAt: 0, language: lang, wrap: false,
+                                      inSpellDocumentWithTag: 0, wordCount: nil).location != NSNotFound
+    }
+    spellers[lang] = works
+    return works
 }
 
 /// "kubectl," "(docker" "utf8" -> the word itself: the lists hold plain words, and the speller doesn't know them.
@@ -260,7 +276,7 @@ func selfTest() {
 
     // Which languages the speller knows differs between Macs; a CI log needs to say what it was judging with.
     setvbuf(stdout, nil, _IONBF, 0)  // a failed precondition traps before a buffered line would be flushed
-    print("spellers:", NSSpellChecker.shared.availableLanguages.sorted().joined(separator: " "))
+    print("spellers:", NSSpellChecker.shared.availableLanguages.sorted().filter(hasSpeller).joined(separator: " "))
     let all = keyboardLayouts(installed: true)
     guard let us = all.first(where: { $0.id == "com.apple.keylayout.US" }),
           let ru = all.first(where: { $0.id == "com.apple.keylayout.Russian" }) else { fatalError("US/Russian layouts not installed") }

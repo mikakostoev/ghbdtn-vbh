@@ -1,6 +1,14 @@
-# A tag v1.2.0 builds the universal zip on a clean runner with the same release.sh anyone can run at home,
+# A tag v2.0.0 builds the universal zip on a clean runner with the same release.sh anyone can run at home,
 # and attaches it to the GitHub release of that tag (creating the release if the tag was pushed bare).
 # So the file on the Releases page is the code in the repository, built by nobody's Mac in particular.
+#
+# Signing. Without secrets the build is ad-hoc and Gatekeeper asks for "Open Anyway". Add these repository
+# secrets and the same tag comes out signed, notarized and stapled:
+#   DEVELOPER_ID_P12          base64 of the "Developer ID Application" certificate with its key (.p12)
+#   DEVELOPER_ID_P12_PASSWORD password of that .p12
+#   NOTARY_APPLE_ID           the Apple ID of the developer account
+#   NOTARY_TEAM_ID            its 10-character Team ID
+#   NOTARY_PASSWORD           an app-specific password from appleid.apple.com
 name: release
 
 on:
@@ -13,9 +21,40 @@ permissions:
 jobs:
   release:
     runs-on: macos-latest
+    env:
+      # `secrets` can't be read in an `if`; an env var can.
+      P12: ${{ secrets.DEVELOPER_ID_P12 }}
     steps:
       - uses: actions/checkout@v5
+      - name: Import the Developer ID certificate
+        if: env.P12 != ''
+        env:
+          P12_PASSWORD: ${{ secrets.DEVELOPER_ID_P12_PASSWORD }}
+        run: |
+          echo "$P12" | base64 --decode > cert.p12
+          security create-keychain -p "" build.keychain
+          security list-keychains -d user -s build.keychain login.keychain
+          security unlock-keychain -p "" build.keychain
+          security import cert.p12 -k build.keychain -P "$P12_PASSWORD" -T /usr/bin/codesign
+          security set-key-partition-list -S apple-tool:,apple: -s -k "" build.keychain
+          rm cert.p12
+          security find-identity -v -p codesigning build.keychain | grep -q '"Developer ID Application:' ||
+            { echo "no Developer ID Application identity in the .p12"; exit 1; }
+          ID=$(security find-identity -v -p codesigning build.keychain | grep -o '"Developer ID Application: [^"]*"' | head -1 | tr -d '"')
+          echo "IDENTITY=$ID" >> "$GITHUB_ENV"
       - run: ./release.sh "${GITHUB_REF_NAME#v}"
+      - name: Notarize and staple
+        if: env.P12 != ''
+        env:
+          APPLE_ID: ${{ secrets.NOTARY_APPLE_ID }}
+          TEAM_ID: ${{ secrets.NOTARY_TEAM_ID }}
+          PASSWORD: ${{ secrets.NOTARY_PASSWORD }}
+        run: |
+          V="${GITHUB_REF_NAME#v}"
+          xcrun notarytool submit "dist/ghbdtn-vbh-$V.zip" --apple-id "$APPLE_ID" --team-id "$TEAM_ID" --password "$PASSWORD" --wait
+          xcrun stapler staple "dist/ghbdtn vbh.app"
+          rm "dist/ghbdtn-vbh-$V.zip"
+          ditto -c -k --keepParent "dist/ghbdtn vbh.app" "dist/ghbdtn-vbh-$V.zip"
       - run: |
           gh release upload "$GITHUB_REF_NAME" dist/ghbdtn-vbh-*.zip --clobber ||
           gh release create "$GITHUB_REF_NAME" dist/ghbdtn-vbh-*.zip --title "ghbdtn vbh ${GITHUB_REF_NAME#v}" --generate-notes

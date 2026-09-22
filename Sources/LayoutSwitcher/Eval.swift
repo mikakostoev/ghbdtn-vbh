@@ -3,10 +3,17 @@ import Foundation
 /// `--eval file…`: types every word of each text twice with the layouts enabled on this Mac — in its own layout
 /// (it must stay) and in the other one (it must switch) — and prints what went wrong and how long the slowest
 /// decisions took. Returns false if anything was switched that shouldn't have been.
+/// `--layouts US,Russian` picks installed layouts by name instead: a CI runner has only one enabled.
 /// Short words that read as words both ways ("Ye"/"Ну") show up as missed here: they are fixed at run time
 /// together with the word after them, which a word-by-word check can't see.
-func evaluate(_ files: [String]) -> Bool {
-    let layouts = keyboardLayouts()
+func evaluate(_ arguments: [String]) -> Bool {
+    var files = arguments, layouts = keyboardLayouts()
+    if let flag = files.firstIndex(of: "--layouts"), flag + 1 < files.count {
+        let names = files[flag + 1].split(separator: ",").map { "com.apple.keylayout." + $0 }
+        layouts = names.compactMap { name in keyboardLayouts(installed: true).first { $0.id == name } }
+        guard layouts.count == names.count else { fatalError("layouts not installed: \(names)") }
+        files.removeSubrange(flag...flag + 1)
+    }
     let tables = layouts.map { layout in
         var table: [Character: Key] = [:]
         for shift in [true, false] {  // unshifted last, so it wins when both produce the character

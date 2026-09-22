@@ -1,7 +1,7 @@
-# Builds the app and runs the self-test on a clean macOS. What it cannot run is `--eval`: that types the test
-# texts in every layout enabled on the machine, and a runner has only one. Locally `./test.sh` does both.
-# The self-test does need the system Russian and English spellers (macOS ships both) and the Russian keyboard
-# layout installed, which is what `keyboardLayouts(installed: true)` asks for — not enabled, only installed.
+# Builds the app and runs the self-test and the evaluation on a clean macOS. A runner has only one layout
+# enabled, so `--eval` is told which installed ones to use; locally `./test.sh` takes the enabled ones.
+# Both need the system Russian and English spellers (macOS ships them) and the Russian keyboard layout installed,
+# which is what `keyboardLayouts(installed: true)` asks for — not enabled, only installed.
 name: test
 
 on:
@@ -15,3 +15,12 @@ jobs:
       - uses: actions/checkout@v5
       - run: swift build -c release
       - run: .build/release/LayoutSwitcher --selftest
+      # Everyday texts: not one false switch is allowed. The rare-word run is for the log only.
+      - run: .build/release/LayoutSwitcher --eval --layouts US,Russian Tests/chat-ru.txt Tests/chat-en.txt
+      - run: .build/release/LayoutSwitcher --eval --layouts US,Russian Tests/stress-ru.txt Tests/stress-en.txt || true
+      # Languages without a system speller: the tables alone. Common words and English must stay put; rare words are for the log.
+      - run: |
+          for pair in hr:Croatian sk:Slovak et:Estonian mk:Macedonian sq:Albanian sr:Serbian-Latin fa:Persian ka:Georgian-QWERTY; do
+            .build/release/LayoutSwitcher --eval --layouts "US,${pair#*:}" "Tests/common-${pair%%:*}.txt" Tests/chat-en.txt
+            .build/release/LayoutSwitcher --eval --layouts "US,${pair#*:}" "Tests/stress-${pair%%:*}.txt" || true
+          done

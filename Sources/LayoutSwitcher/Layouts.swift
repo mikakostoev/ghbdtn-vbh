@@ -118,39 +118,54 @@ func intendedLayout(for keys: [Key], current: Layout, others: [Layout], exceptio
     if hasInnerPunctuation(typed) || strayTail, let plain = candidates.first(where: {
         bare($0.1).allSatisfy(\.isLetter) && isWord($0.1, lang: $0.0.lang, learned: learned) == true
     }) { return plain.0 }
-    guard isWord(typed, lang: current.lang, learned: learned, asTyped: true) == false else { return nil }
+    // Without a speller for the language (Croatian, Slovak, Farsi...) the table stands in: a word with ordinary
+    // letter triplets is taken for a real one. With neither, the word is left alone.
+    // ponytail: 100 is the top of the range measured on ru/en; the speller-less languages are checked on word
+    // lists only (no chat texts), and the speller's leniency with punctuation means "kuća" typed as "ku'a" stays.
+    let letters = strangeness(of: typed.filter(\.isLetter), lang: current.lang)
+    let spelled = isWord(typed, lang: current.lang, learned: learned, asTyped: true)
+    guard (spelled ?? letters.map { $0 <= 100 }) == false else { return nil }
     // A reading cut up by punctuation passes the speller piece by piece: "бауэр" reads ",fe'h", that is "fe" and "h".
     // Hyphens, apostrophes, dots and underscores do sit inside words ("из-за", "I've", "user_name"); anything else,
     // or punctuation in front, is believed only if what was typed looks like nothing: names cost 90-100, gibberish 130+.
     func natural(_ reading: String) -> Bool {
         reading.first!.isLetter && bare(reading).allSatisfy { $0.isLetter || "-'’._".contains($0) }
     }
-    let letters = strangeness(of: typed.filter(\.isLetter), lang: current.lang) ?? .infinity
+    // With only the table vouching against the typed word, the speller's find must look ordinary by its own
+    // table too: it waves through "lMssDk" and "f_h" piece by piece.
     if let exact = candidates.first(where: {
-        isWord($0.1, lang: $0.0.lang, learned: learned) == true && (natural($0.1) || letters > 115)
+        isWord($0.1, lang: $0.0.lang, learned: learned) == true && (natural($0.1) || (letters ?? .infinity) > 115)
+            && (spelled != nil || (strangeness(of: bare($0.1), lang: $0.0.lang) ?? 0) <= 100)
     }) { return exact.0 }
     // In no dictionary (slang, names, inflected jargon): letter statistics decide, from memory and in microseconds.
     // "ltdjgcjd" can't be English and "девопсов" is ordinary Russian. Measured on 5 700 rare words and names from
     // outside the tables: a gap of 40 adds no false switch; the speller's guesses used to catch a third more of
     // them (foreign names mostly) but held the key for 15-100 ms, against the rule of never waiting on another
     // process while a key is down.
+    // With three layouts the most ordinary reading wins, not the first one past the gap: "ghbdsn" is nearly
+    // Russian ("привыт") and plainly Ukrainian ("привіт").
     guard bare(typed).count >= 4, let odd = strangeness(of: bare(typed), lang: current.lang) else { return nil }
-    return candidates.first {
-        bare($0.1).allSatisfy(\.isLetter) && odd - (strangeness(of: bare($0.1), lang: $0.0.lang) ?? .infinity) > 40
-    }?.0
+    return candidates.filter { bare($0.1).allSatisfy(\.isLetter) }
+        .map { ($0.0, strangeness(of: bare($0.1), lang: $0.0.lang) ?? .infinity) }
+        .filter { odd - $0.1 > 40 }.min { $0.1 < $1.1 }?.0
 }
 
-private let trigrams: [String: (unseen: Double, triplets: [Substring: Double])] = trigramTables.mapValues { table in
-    (table.unseen, Dictionary(uniqueKeysWithValues: table.triplets.split(whereSeparator: \.isWhitespace).map {
+/// Parsed on first use, one language at a time: there are 35 tables and a Mac has two or three layouts.
+private var trigrams: [String: (unseen: Double, triplets: [Substring: Double])] = [:]
+private func trigramTable(_ lang: String) -> (unseen: Double, triplets: [Substring: Double])? {
+    if let parsed = trigrams[lang] { return parsed }
+    guard let table = trigramTables[lang] else { return nil }
+    let parsed = (table.unseen, Dictionary(uniqueKeysWithValues: table.triplets.split(whereSeparator: \.isWhitespace).map {
         ($0.prefix(3), Double($0.dropFirst(3))!)
     }))
+    trigrams[lang] = parsed
+    return parsed
 }
 
 /// Mean cost of the word's letter triplets: 60-100 for a real word, 130+ for one typed in the wrong layout.
-/// Nil for a language without a table.
-// ponytail: ru/en only; generate tables for other languages the same way when someone needs them.
+/// Nil for a language without a table (Tools/trigrams.py says which have one).
 private func strangeness(of word: String, lang: String) -> Double? {
-    guard let table = trigrams[lang] else { return nil }
+    guard let table = trigramTable(lang) else { return nil }
     let padded = Substring("^^" + word.lowercased() + "$")
     let costs = padded.indices.dropLast(2).map { table.triplets[padded[$0...].prefix(3)] ?? table.unseen }
     return costs.reduce(0, +) / Double(costs.count)
@@ -211,11 +226,8 @@ func fixedNumber(for keys: [Key], current: Layout, others: [Layout]) -> String? 
     return nil
 }
 
-private let oneLetterWords = ["ru": Set("явскоуаи"), "en": Set("ai")]
-
 /// A lone letter proves nothing ("b" vs "и"), so it is only fixed together with the next word,
 /// once that word has shown which layout was meant.
-// ponytail: ru/en table only; extend the dictionary for other languages.
 func isMistypedLetter(_ keys: [Key], current: Layout, target: Layout) -> Bool {
     guard keys.count == 1, let typed = current.translate(keys).lowercased().first,
           let meant = target.translate(keys).lowercased().first else { return false }
@@ -322,6 +334,20 @@ func selfTest() {
         precondition(intendedLayout(for: uber, current: us, others: [ru, de], exceptions: ["über"]) == nil)
         precondition(convert("für", layouts: [de, ru])?.text == ru.translate(fur))
     }
+    // Ukrainian: a third layout next to the two. "ghsdbn" is a word only there; "лгіусед" still goes to English.
+    if let uk = all.first(where: { $0.id == "com.apple.keylayout.Ukrainian" }) {
+        let pryvit = keys([5, 4, 1, 2, 11, 45])
+        precondition(uk.translate(pryvit) == "привіт" && ru.translate(pryvit) == "прывит")
+        precondition(intendedLayout(for: pryvit, current: us, others: [ru, uk], exceptions: [])?.id == uk.id)
+        precondition(intendedLayout(for: pryvit, current: uk, others: [us, ru], exceptions: []) == nil)
+        precondition(intendedLayout(for: ghbdtn, current: us, others: [uk, ru], exceptions: [])?.id == ru.id)
+        precondition(intendedLayout(for: kubectl, current: uk, others: [us, ru], exceptions: [])?.id == us.id)
+        // In no dictionary: "загуглити" against "pfueuksns" and "загуглыты" is decided by the tables.
+        let zahuhlyty = keys([35, 3, 32, 14, 32, 40, 1, 45, 1])
+        precondition(uk.translate(zahuhlyty) == "загуглити")
+        precondition(intendedLayout(for: zahuhlyty, current: us, others: [ru, uk], exceptions: [])?.id == uk.id)
+        precondition(intendedLayout(for: zahuhlyty, current: uk, others: [us, ru], exceptions: []) == nil)
+    }
     precondition(intendedLayout(for: keys([3, 33, 3, 33, 3]), current: ru, others: [us], exceptions: []) == nil)  // ахаха, not "f[f[f"
     precondition(isMistypedShort(keys([16, 14]), current: us, target: ru))     // Ye -> ну
     precondition(isMistypedShort(keys([17, 4, 14]), current: ru, target: us))  // еру -> the
@@ -369,6 +395,24 @@ func selfTest() {
             let reading = other.translate(typed)
             precondition(hasInnerPunctuation(reading) || isWord(reading, lang: other.lang) != true, "built-in \(word) shadows \(reading)")
         }
+    }
+    // No speller for Croatian (Apple's layout is QWERTY, only č ć š ž đ differ): the table alone keeps "dobro"
+    // and "kuća" Croatian and sends "quickly" to English. Macedonian, a different script: "pi[uva" is "пишува".
+    if let hr = all.first(where: { $0.id == "com.apple.keylayout.Croatian" }) {
+        let quickly = keys(for: "quickly", in: us)!
+        precondition(hr.translate(quickly) == "quickly")
+        precondition(intendedLayout(for: keys(for: "dobro", in: hr)!, current: hr, others: [us], exceptions: []) == nil)
+        precondition(intendedLayout(for: keys(for: "kuća", in: hr)!, current: hr, others: [us], exceptions: []) == nil)
+        precondition(intendedLayout(for: quickly, current: hr, others: [us], exceptions: [])?.id == us.id)
+        precondition(intendedLayout(for: quickly, current: us, others: [hr], exceptions: []) == nil)
+    }
+    if let mk = all.first(where: { $0.id == "com.apple.keylayout.Macedonian" }) {
+        let pishuva = keys(for: "пишува", in: mk)!, quickly = keys(for: "quickly", in: us)!
+        precondition(us.translate(pishuva) == "pi[uva" && mk.translate(quickly) == "љуицклѕ")
+        precondition(intendedLayout(for: pishuva, current: us, others: [mk], exceptions: [])?.id == mk.id)
+        precondition(intendedLayout(for: pishuva, current: mk, others: [us], exceptions: []) == nil)
+        precondition(intendedLayout(for: quickly, current: mk, others: [us], exceptions: [])?.id == us.id)
+        precondition(intendedLayout(for: quickly, current: us, others: [mk], exceptions: []) == nil)
     }
     // Whole phrases through the same buffer the event tap drives: live.sh without a keyboard. The keys are the
     // ones a US layout types; `shown` is the text left on screen, with each fix applied the way the app applies

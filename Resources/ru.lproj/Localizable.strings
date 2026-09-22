@@ -1,4 +1,4 @@
-/* Русский интерфейс. Ключи — английские строки из кода. */
+/* Russian interface. The keys are the English strings as they stand in the code. */
 
 "Auto-switch" = "Автопереключение";
 "No access: Accessibility…" = "Нет доступа: Универсальный доступ…";

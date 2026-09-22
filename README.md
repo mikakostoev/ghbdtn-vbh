@@ -1,107 +1,139 @@
-# LayoutSwitcher — автопереключатель раскладки для macOS
+# LayoutSwitcher — keyboard layout auto-switcher for macOS
 
 [![test](https://github.com/mikakostoev/layout-switcher/actions/workflows/test.yml/badge.svg)](https://github.com/mikakostoev/layout-switcher/actions/workflows/test.yml)
 
-Набрали «ghbdtn» — получили «привет». Бесплатно, с открытым кодом и без слежки: в программе нет ни одной
-строчки сетевого кода.
+You type `ghbdtn`, you get «привет». Free, open source, and nothing phones home: the app contains no networking
+code at all.
 
-*A keyboard layout auto-switcher for macOS. Free, open source, zero telemetry: the app contains no networking code at all.*
+## How it works
 
-## Как это работает
+You start typing in one language while the keyboard is still in another layout — the app fixes the word on the
+spot. `ghbdtn rfr ltkf hello` becomes «привет как дела hello». It works with any keyboard layout macOS knows,
+not only Russian and English ([details below](#languages)).
 
-Пишете на автомате по-русски в английской раскладке (или наоборот) — приложение тут же исправляет слово.
-Например, из `ghbdtn rfr ltkf hello` получается «привет как дела hello».
+![Typed ghbdtn rfr ltkf hello — the screen shows привет как дела hello](.github/demo.gif)
 
-![Набрано ghbdtn rfr ltkf hello — на экране «привет как дела hello»](.github/demo.gif)
+To fix only the last word, or the text you have selected, press Option twice (the shortcut is configurable).
 
-Если нужно исправить только последнее слово или выделенный фрагмент, достаточно дважды нажать Option
-(настройку можно поменять).
+## Quick start
 
-## Быстрый старт
-
-1. **Установить.** Проще всего через Homebrew:
+1. **Install.** The easiest way is Homebrew:
    ```bash
    brew tap mikakostoev/layout-switcher https://github.com/mikakostoev/layout-switcher && brew install --cask --no-quarantine layoutswitcher
    ```
-   Или скачать готовый архив со страницы [Releases](https://github.com/mikakostoev/layout-switcher/releases)
-   и просто перетащить `LayoutSwitcher.app` в папку «Программы».
-2. **Разрешить доступ.** При первом запуске macOS заблокирует программу. Зайдите в «Системные настройки →
-   Конфиденциальность и безопасность», нажмите «Всё равно открыть», а затем дайте приложению доступ в разделе
-   «Универсальный доступ». Без этого переключатель не увидит нажатия клавиш.
-3. **Проверить.** Откройте любой текстовый редактор, напишите `ghbdtn` и нажмите пробел.
+   Or download the archive from [Releases](https://github.com/mikakostoev/layout-switcher/releases) and drag
+   `LayoutSwitcher.app` into Applications.
+2. **Grant access.** On first launch macOS blocks the app. Go to System Settings → Privacy & Security, click
+   "Open Anyway", then allow the app under Accessibility. Without that it cannot see keystrokes.
+3. **Try it.** Open any text editor, type `ghbdtn` and press space.
 
-Подробности про установку и сборку — [ниже](#установка-подробно), про то, как помочь проекту, —
-в [CONTRIBUTING.md](CONTRIBUTING.md).
+Installation and building are covered [below](#installation-in-detail); how to help is in
+[CONTRIBUTING.md](CONTRIBUTING.md).
 
-## Почему ему можно доверять клавиатуру
+## Why it can be trusted with your keyboard
 
-Программа видит всё, что вы печатаете, иначе она просто не сможет работать. Вот почему ей стоит дать такой доступ:
+The app sees everything you type; it cannot work otherwise. Here is why that is safe:
 
-- **Нет сети от слова совсем.** Никаких обновлений, статистики использования, проверки лицензии или отчётов об
-  ошибках. Это легко проверить командой, которая ищет любые упоминания сетевых библиотек в коде — результат
-  будет пустым:
+- **No network, none.** No updates, usage statistics, licence checks or crash reports. Easy to verify with a
+  command that looks for any networking library in the code — the output is empty:
   ```bash
   grep -rnE "URLSession|URLRequest|NWConnection|CFSocket|WebKit" Sources/
   ```
-- **Код короткий и открытый.** Около тысячи строк на Swift лежат в папке `Sources/`. Их реально прочитать
-  за один вечер.
-- **Текст нигде не сохраняется.** В памяти хранится только то слово, которое вы прямо сейчас дописываете
-  (и максимум три предыдущих коротких слова). Как только вы кликнули мышкой, нажали стрелки или сменили окно —
-  буфер очищается. На диск он никогда не пишется, никакого «дневника набора» здесь нет.
-- **Пароли под защитой.** Пока система сообщает, что поле защищено (например, менеджер паролей или браузер),
-  программа вообще не смотрит на клавиши.
-- **Минимум следов на диске.** Приложение создаёт всего три простых текстовых файла
-  в `~/Library/Application Support/LayoutSwitcher/`: список исключений (`exceptions.txt`), ваши ручные правки
-  (`words.txt`) и сайты-исключения (`sites.txt`). Всё это видно в настройках.
-- **Буфер обмена почти не трогает.** Программа обращается к нему только в одном случае: если вы попросили
-  сконвертировать выделенный текст, но само приложение (например, Electron или часть браузеров) не отдаёт его
-  напрямую. Тогда утилита нажимает Cmd+C, читает текст и мгновенно возвращает в буфер то, что там было до этого.
-- **Локальная статистика.** Незнакомые слова проверяются по встроенной таблице частот буквосочетаний.
-  Там хранятся только сухие цифры вероятностей, ваших слов там нет.
+- **The code is short and open.** About a thousand lines of Swift in `Sources/` (not counting `Trigrams.swift`,
+  a generated table of numbers). It can be read in an evening.
+- **Nothing you type is kept.** Memory holds only the word you are typing right now (and at most three short
+  words before it). A mouse click, an arrow key or a window switch clears the buffer. It is never written to disk;
+  there is no typing log.
+- **Passwords are off limits.** While the system reports a secure field (a password manager, a browser's
+  password box), the app does not look at the keys at all.
+- **Minimal footprint.** The app creates three plain text files in `~/Library/Application Support/LayoutSwitcher/`:
+  your exceptions (`exceptions.txt`), your manual corrections (`words.txt`) and excluded sites (`sites.txt`).
+  All of them are visible in the settings.
+- **The clipboard is barely touched.** Only in one case: you asked to convert the selected text, and the
+  application (Electron, some browsers) does not hand it over directly. Then the app presses Cmd+C, reads the
+  text and immediately puts back whatever the clipboard held before.
+- **Local statistics.** Unknown words are judged by a built-in table of letter-combination frequencies. It holds
+  dry probabilities only; none of your words are in it.
 
-## Что умеет
+## What it does
 
-- Переключает слова набело: `ghbdtn` → «привет», `руддщ` → «hello».
-- Понимает сленг и имена, которых нет в системном словаре, опираясь на статистику языка: например, `ltdjgcjd`
-  превратится в «девопсов».
-- Исправляет короткие слова задним числом в начале фразы: `ye ns ghbdtn` → «ну ты привет».
-- Дружит с капсом, аббревиатурами (`cif` → «сша»), идентификаторами (`getUserName`), числами (`10ю5` → `10.5`)
-  и растянутыми словами («привееет»).
-- Двойной Option конвертирует последнее слово или ваш выделенный текст вручную.
-- Знает исключения: можно отключить автопереключение для конкретных программ, сайтов или добавить свои
-  слова-исключения.
-- Интерфейс сам подстраивается под язык системы (русский или английский), а значок в строке меню гаснет,
-  когда функция выключена.
+- Switches whole words: `ghbdtn` → «привет», `руддщ` → «hello».
+- Understands slang and names the system dictionary doesn't know, from the statistics of the language:
+  `ltdjgcjd` becomes «девопсов».
+- Fixes short words retroactively at the start of a phrase: `ye ns ghbdtn` → «ну ты привет».
+- Copes with Caps Lock, abbreviations (`cif` → «сша»), identifiers (`getUserName`), numbers (`10ю5` → `10.5`)
+  and stretched words («привееет»).
+- Double Option converts the last word or your selection by hand.
+- Knows exceptions: switching can be turned off for particular apps or sites, and you can add your own words.
+- The interface follows the system language (English or Russian), and the menu bar icon dims when switching
+  is off.
 
-**Чего пока нет (в отличие от аналогов):** версии для Windows, работы внутри RDP и виртуальных машин, функции
-автокоррекции опечаток и многолетней базы пользователей. Статистика букв есть для русского, английского
-и украинского; другие языки работают через обычный системный словарь macOS.
+**What it doesn't have (unlike the commercial alternatives):** a Windows version, support inside RDP and
+virtual machines, typo correction, and years of user base.
 
-## Точность и скорость
+## Languages
 
-Вместо обещаний — тесты, которые может запустить каждый (скрипт `./test.sh`):
+Any keyboard layout macOS has will do: the language comes from the layout itself, words are checked against
+the system dictionary and the built-in letter statistics (available for 35 languages). Honestly, here is where
+it works and where it doesn't.
 
-- На обычных повседневных текстах (чаты, работа, немного кода): **ноль ложных срабатываний**. Не переключаются
-  только крошечные двух-трёхбуквенные слова, которые читаются в обеих раскладках — их обычно исправляет
-  следующее слово.
-- На базе из 5700 редких слов и имён из субтитров: всего 3 ошибки.
-- Решение принимается локально в памяти и занимает меньше миллисекунды. Даже при жёстком тесте на 11 тысяч
-  замен дольше 10 мс работали лишь единичные случаи (из-за задумчивости самого системного словаря macOS).
+**Works like Russian and English do:** Ukrainian, German, French, Spanish, Italian, Portuguese, Dutch, Danish,
+Norwegian, Swedish, Finnish, Icelandic, Czech, Polish, Slovak, Hungarian, Romanian, Bulgarian, Greek, Turkish,
+Lithuanian, Hebrew, Arabic. Only Russian, English, Ukrainian and German are checked on texts; the others use the
+same mechanism.
 
-## Установка подробно
+**Works poorly:**
 
-- **Готовый файл:** скачайте `.zip` со страницы [Releases](https://github.com/mikakostoev/layout-switcher/releases),
-  распакуйте и перенесите `.app` в «Программы». Сборка универсальная (Apple Silicon и Intel), нужна macOS 13
-  Ventura или новее. Файл собирается автоматически на серверах GitHub из того же кода, что лежит в репозитории.
-- **Первый запуск:** так как у программы нет платного сертификата разработчика Apple ($99 в год), macOS её
-  остановит. Нажмите «Всё равно открыть» в уведомлении или через правый клик по иконке → «Открыть». После
-  каждого обновления доступ в «Универсальном доступе» придётся выдавать заново — у сборки меняется подпись.
-- **Через Homebrew:** команда выше. Если поставить без флага `--no-quarantine`, первый запуск потребует тех же
-  действий с «Всё равно открыть».
+- *Languages without a system dictionary* — Croatian, Slovak, Estonian, Macedonian, Albanian, Serbian, Farsi,
+  Georgian. Letter statistics decide alone: common words are held without a single error, rare words and names
+  see 2–9 false switches per three thousand (see `Tests/stress-*.txt`).
+- *Layouts whose letters match the English ones* — Croatian, Slovak, Estonian, Czech, Polish, Hungarian. Typed
+  on the English layout, only č, š, ő and the like come out wrong, and such words are not fixed. The other way
+  works: an English word typed on such a layout switches the layout back.
+- *Phonetic layouts* — Macedonian, Bulgarian-Phonetic, Russian-Phonetic. «убаво» typed on the English layout
+  reads «ubavo», and the statistics can't tell the difference; only words with letters like ш, ж, ч get fixed.
+- *Languages without a layout of their own* — Indonesian, Catalan, Basque, Esperanto. They are typed on the
+  English or Spanish layout, so the app takes them for English or Spanish: hardly any false switches, but no
+  dictionary protects their words either.
 
-## Сборка из исходников (если не доверяете готовому файлу)
+**Doesn't work:**
 
-Нужны Xcode или Command Line Tools.
+- *Chinese, Japanese, Korean* — these are input methods, not keyboard layouts.
+- *Thai, Lao, Khmer, Burmese, Tibetan* — with no spaces between words the app can't see where a word ends.
+- *Latvian, Vietnamese* and other layouts with dead keys: accented letters take two keystrokes, and a word with
+  ā or ệ never comes together.
+- *Hindi, Bengali, Tamil* and the other Indic scripts — untested; don't expect much.
+- *Belarusian, Armenian, Kazakh, Kyrgyz, Tajik, Uzbek, Azerbaijani, Urdu* and any other language with neither
+  a macOS dictionary nor a statistics table in the app: their words are left alone entirely.
+
+## Accuracy and speed
+
+Instead of promises, tests anyone can run (`./test.sh`):
+
+- On everyday texts (chat, work talk, a bit of code): **zero false switches**. The only words left unfixed are
+  tiny two- and three-letter ones that read as words in both layouts — the next word usually fixes them.
+- On 5,700 rare words and names from subtitles: 3 mistakes in total.
+- Eight languages without a system dictionary (from Croatian to Farsi and Georgian) are checked separately:
+  zero false switches on common words, 2–9 per three thousand rare ones, mostly English words that sit inside
+  the foreign lists.
+- A decision is made locally, in memory, in under a millisecond. Even in a hard test of 11,000 substitutions
+  only a handful took longer than 10 ms (the macOS dictionary itself thinking things over).
+
+## Installation in detail
+
+- **Prebuilt:** download the `.zip` from [Releases](https://github.com/mikakostoev/layout-switcher/releases),
+  unpack and move the `.app` into Applications. The build is universal (Apple Silicon and Intel) and needs
+  macOS 13 Ventura or newer. The file is built automatically on GitHub's servers from the very code in the
+  repository.
+- **First launch:** the app has no paid Apple developer certificate ($99 a year), so macOS stops it. Click
+  "Open Anyway" in the notification, or right-click the icon → Open. After every update the Accessibility grant
+  has to be given again — the build's signature changes.
+- **Homebrew:** the command above. Installed without `--no-quarantine`, the first launch needs the same "Open
+  Anyway" step.
+
+## Building from source (if you don't trust the prebuilt file)
+
+Xcode or the Command Line Tools are required.
 
 ```bash
 git clone https://github.com/mikakostoev/layout-switcher.git && cd layout-switcher
@@ -115,20 +147,20 @@ git clone https://github.com/mikakostoev/layout-switcher.git && cd layout-switch
 open LayoutSwitcher.app
 ```
 
-Чтобы после каждой пересборки macOS не требовала снова давать доступ, можно создать в «Связке ключей» бесплатный
-самоподписанный сертификат для подписи кода с именем `LayoutSwitcher Local Signing` (ищите «Ассистент
-сертификации»). Скрипты соберут и подпишут приложение этим сертификатом.
+To stop macOS from asking for Accessibility after every rebuild, create a free self-signed code-signing
+certificate in Keychain Access named `LayoutSwitcher Local Signing` (Certificate Assistant). The scripts build
+and sign the app with it.
 
-Для релиза используется скрипт `./release.sh 1.1.0`, который собирает универсальный архив. Тег версии
-на GitHub делает ровно то же самое и прикрепляет файл к релизу.
+A release is built with `./release.sh 1.1.0`, which produces the universal archive. A version tag on GitHub does
+exactly the same and attaches the file to the release.
 
-## Как убедиться, что всё работает
+## Making sure it works
 
-- `./test.sh` — прогоняет сборку, внутренние тесты и проверку на текстах.
-- `Tests/live.sh` — открывает тестовое окно и несколько секунд эмулирует живой набор текста, занимая клавиатуру.
+- `./test.sh` — builds, runs the self-test and the checks on texts.
+- `Tests/live.sh` — opens a test window and emulates live typing for a few seconds, taking over the keyboard.
 
-## Лицензия
+## Licence
 
-Весь код открыт под [MIT](LICENSE). Таблица частот букв и стресс-тесты взяты из открытого датасета
-[FrequencyWords](https://github.com/hermitdave/FrequencyWords) и распространяются под лицензией
-CC BY-SA 4.0 ([NOTICE.md](NOTICE.md)).
+All code is [MIT](LICENSE). The letter frequency tables and the stress tests are derived from the open
+[FrequencyWords](https://github.com/hermitdave/FrequencyWords) dataset, distributed under CC BY-SA 4.0
+([NOTICE.md](NOTICE.md)).

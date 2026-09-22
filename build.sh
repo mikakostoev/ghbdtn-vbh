@@ -30,11 +30,13 @@ if [ ! -f "$ICON.icns" ] || [ Tools/icon.swift -nt "$ICON.icns" ]; then
 fi
 mkdir -p "$APP/Resources"
 cp "$ICON.icns" "$APP/Resources/LayoutSwitcher.icns"
+cp -R Resources/*.lproj "$APP/Resources/"
 cat > "$APP/Info.plist" <<PLIST
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0"><dict>
 <key>CFBundleIdentifier</key><string>local.layoutswitcher</string>
+<key>CFBundleDevelopmentRegion</key><string>en</string>
 <key>CFBundleName</key><string>LayoutSwitcher</string>
 <key>CFBundleExecutable</key><string>LayoutSwitcher</string>
 <key>CFBundleIconFile</key><string>LayoutSwitcher</string>

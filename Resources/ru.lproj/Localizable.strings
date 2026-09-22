@@ -1,0 +1,28 @@
+/* Русский интерфейс. Ключи — английские строки из кода. */
+
+"Auto-switch" = "Автопереключение";
+"No access: Accessibility…" = "Нет доступа: Универсальный доступ…";
+"Settings…" = "Настройки…";
+"Quit" = "Выйти";
+"LayoutSwitcher: no Accessibility access" = "LayoutSwitcher: нет доступа к Универсальному доступу";
+"LayoutSwitcher: auto-switching is off" = "LayoutSwitcher: автопереключение выключено";
+
+"Switch the layout automatically" = "Автоматически переключать раскладку";
+"Fix short words before a switched one (я, ну, мы, the…)" = "Исправлять короткие слова перед переключённым (я, ну, мы, the…)";
+"Convert the last word or the selection with Option" = "Конвертировать последнее слово или выделенный текст по Option";
+"Option press" = "Нажатие Option";
+"Single" = "Одиночное";
+"Double" = "Двойное";
+"Remember words converted by hand" = "Запоминать слова, сконвертированные вручную";
+"Open at login" = "Запускать при входе в систему";
+
+"General" = "Основные";
+"Words" = "Слова";
+"Apps and sites" = "Приложения и сайты";
+
+"These words are never switched automatically — one per line." = "Эти слова не переключаются автоматически — по одному в строке.";
+"Learned words: no dictionary knows them, but you converted them by hand, so now they switch by themselves." = "Выученные слова: их нет в словаре, но вы конвертировали их вручную — теперь они переключаются сами.";
+"The switcher is off in these apps." = "В этих приложениях переключатель не работает.";
+"Remove" = "Убрать";
+"Add app…" = "Добавить приложение…";
+"The layout is never switched by itself on these sites — one per line: github.com" = "На этих сайтах раскладка не переключается сама — по одному в строке: github.com";

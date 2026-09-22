@@ -1,0 +1,29 @@
+/* The keys are the English strings as they stand in the code; this table exists so that English is offered
+   as a localization at all, and so that both languages are edited in the same place. */
+
+"Auto-switch" = "Auto-switch";
+"No access: Accessibility…" = "No access: Accessibility…";
+"Settings…" = "Settings…";
+"Quit" = "Quit";
+"LayoutSwitcher: no Accessibility access" = "LayoutSwitcher: no Accessibility access";
+"LayoutSwitcher: auto-switching is off" = "LayoutSwitcher: auto-switching is off";
+
+"Switch the layout automatically" = "Switch the layout automatically";
+"Fix short words before a switched one (я, ну, мы, the…)" = "Fix short words before a switched one (я, ну, мы, the…)";
+"Convert the last word or the selection with Option" = "Convert the last word or the selection with Option";
+"Option press" = "Option press";
+"Single" = "Single";
+"Double" = "Double";
+"Remember words converted by hand" = "Remember words converted by hand";
+"Open at login" = "Open at login";
+
+"General" = "General";
+"Words" = "Words";
+"Apps and sites" = "Apps and sites";
+
+"These words are never switched automatically — one per line." = "These words are never switched automatically — one per line.";
+"Learned words: no dictionary knows them, but you converted them by hand, so now they switch by themselves." = "Learned words: no dictionary knows them, but you converted them by hand, so now they switch by themselves.";
+"The switcher is off in these apps." = "The switcher is off in these apps.";
+"Remove" = "Remove";
+"Add app…" = "Add app…";
+"The layout is never switched by itself on these sites — one per line: github.com" = "The layout is never switched by itself on these sites — one per line: github.com";

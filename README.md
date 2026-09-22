@@ -1,9 +1,14 @@
-# LayoutSwitcher — keyboard layout auto-switcher for macOS
+# ghbdtn vbh → привет мир
 
-[![test](https://github.com/mikakostoev/layout-switcher/actions/workflows/test.yml/badge.svg)](https://github.com/mikakostoev/layout-switcher/actions/workflows/test.yml)
+[![test](https://github.com/mikakostoev/ghbdtn-vbh/actions/workflows/test.yml/badge.svg)](https://github.com/mikakostoev/ghbdtn-vbh/actions/workflows/test.yml)
+[![release](https://img.shields.io/github/v/release/mikakostoev/ghbdtn-vbh?label=release)](https://github.com/mikakostoev/ghbdtn-vbh/releases/latest)
+[![downloads](https://img.shields.io/github/downloads/mikakostoev/ghbdtn-vbh/total?label=downloads)](https://github.com/mikakostoev/ghbdtn-vbh/releases)
+[![macOS 13+](https://img.shields.io/badge/macOS-13%2B-black?logo=apple)](#installation-in-detail)
+[![Swift 5.9](https://img.shields.io/badge/Swift-5.9-F05138?logo=swift&logoColor=white)](Package.swift)
+[![license MIT](https://img.shields.io/github/license/mikakostoev/ghbdtn-vbh?label=license)](LICENSE)
 
-You type `ghbdtn`, you get «привет». Free, open source, and nothing phones home: the app contains no networking
-code at all.
+Keyboard layout auto-switcher for macOS. You type `ghbdtn vbh`, you get «привет мир». Free, open source, and
+nothing phones home: the app contains no networking code at all.
 
 ## How it works
 
@@ -19,10 +24,11 @@ To fix only the last word, or the text you have selected, press Option twice (th
 
 1. **Install.** The easiest way is Homebrew:
    ```bash
-   brew tap mikakostoev/layout-switcher https://github.com/mikakostoev/layout-switcher && brew install --cask --no-quarantine layoutswitcher
+   brew tap mikakostoev/ghbdtn-vbh https://github.com/mikakostoev/ghbdtn-vbh && brew install --cask --no-quarantine ghbdtn-vbh
    ```
-   Or download the archive from [Releases](https://github.com/mikakostoev/layout-switcher/releases) and drag
-   `LayoutSwitcher.app` into Applications.
+   The cask points at the first release under the new name, 2.0.0.
+   Or download the archive from [Releases](https://github.com/mikakostoev/ghbdtn-vbh/releases) and drag
+   `ghbdtn vbh.app` into Applications.
 2. **Grant access.** On first launch macOS blocks the app. Go to System Settings → Privacy & Security, click
    "Open Anyway", then allow the app under Accessibility. Without that it cannot see keystrokes.
 3. **Try it.** Open any text editor, type `ghbdtn` and press space.
@@ -46,7 +52,7 @@ The app sees everything you type; it cannot work otherwise. Here is why that is 
   there is no typing log.
 - **Passwords are off limits.** While the system reports a secure field (a password manager, a browser's
   password box), the app does not look at the keys at all.
-- **Minimal footprint.** The app creates three plain text files in `~/Library/Application Support/LayoutSwitcher/`:
+- **Minimal footprint.** The app creates three plain text files in `~/Library/Application Support/ghbdtn vbh/`:
   your exceptions (`exceptions.txt`), your manual corrections (`words.txt`) and excluded sites (`sites.txt`).
   All of them are visible in the settings.
 - **The clipboard is barely touched.** Only in one case: you asked to convert the selected text, and the
@@ -121,7 +127,7 @@ Instead of promises, tests anyone can run (`./test.sh`):
 
 ## Installation in detail
 
-- **Prebuilt:** download the `.zip` from [Releases](https://github.com/mikakostoev/layout-switcher/releases),
+- **Prebuilt:** download the `.zip` from [Releases](https://github.com/mikakostoev/ghbdtn-vbh/releases),
   unpack and move the `.app` into Applications. The build is universal (Apple Silicon and Intel) and needs
   macOS 13 Ventura or newer. The file is built automatically on GitHub's servers from the very code in the
   repository.
@@ -136,7 +142,7 @@ Instead of promises, tests anyone can run (`./test.sh`):
 Xcode or the Command Line Tools are required.
 
 ```bash
-git clone https://github.com/mikakostoev/layout-switcher.git && cd layout-switcher
+git clone https://github.com/mikakostoev/ghbdtn-vbh.git && cd ghbdtn-vbh
 ```
 
 ```bash
@@ -144,7 +150,7 @@ git clone https://github.com/mikakostoev/layout-switcher.git && cd layout-switch
 ```
 
 ```bash
-open LayoutSwitcher.app
+open "ghbdtn vbh.app"
 ```
 
 To stop macOS from asking for Accessibility after every rebuild, create a free self-signed code-signing

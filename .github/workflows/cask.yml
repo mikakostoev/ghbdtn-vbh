@@ -1,4 +1,4 @@
-# Keeps Casks/layoutswitcher.rb pointing at the newest release: takes the zip of the release just published,
+# Keeps Casks/ghbdtn-vbh.rb pointing at the newest release: takes the zip of the release just published,
 # computes its sha256 and commits the new version and checksum to main. Listens to both a release made by hand
 # and one made by the release workflow (a release created with the workflow token fires no release event).
 name: cask
@@ -26,9 +26,9 @@ jobs:
       - run: |
           case "$TAG" in v*) ;; *) echo "not a release tag: $TAG"; exit 0;; esac
           V="${TAG#v}"
-          curl -sSLf -o app.zip "https://github.com/$GITHUB_REPOSITORY/releases/download/$TAG/LayoutSwitcher-$V.zip"
+          curl -sSLf -o app.zip "https://github.com/$GITHUB_REPOSITORY/releases/download/$TAG/ghbdtn-vbh-$V.zip"
           SHA=$(sha256sum app.zip | cut -d' ' -f1)
-          sed -i -e "s/^  version \".*\"/  version \"$V\"/" -e "s/^  sha256 \".*\"/  sha256 \"$SHA\"/" Casks/layoutswitcher.rb
+          sed -i -e "s/^  version \".*\"/  version \"$V\"/" -e "s/^  sha256 \".*\"/  sha256 \"$SHA\"/" Casks/ghbdtn-vbh.rb
           git config user.name github-actions
           git config user.email github-actions[bot]@users.noreply.github.com
           git diff --quiet || { git commit -am "Point the cask at $V" && git push; }

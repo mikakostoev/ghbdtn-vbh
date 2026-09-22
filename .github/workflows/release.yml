@@ -1,0 +1,23 @@
+# A tag v1.2.0 builds the universal zip on a clean runner with the same release.sh anyone can run at home,
+# and attaches it to the GitHub release of that tag (creating the release if the tag was pushed bare).
+# So the file on the Releases page is the code in the repository, built by nobody's Mac in particular.
+name: release
+
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v5
+      - run: ./release.sh "${GITHUB_REF_NAME#v}"
+      - run: |
+          gh release upload "$GITHUB_REF_NAME" dist/LayoutSwitcher-*.zip --clobber ||
+          gh release create "$GITHUB_REF_NAME" dist/LayoutSwitcher-*.zip --title "LayoutSwitcher ${GITHUB_REF_NAME#v}" --generate-notes
+        env:
+          GH_TOKEN: ${{ github.token }}

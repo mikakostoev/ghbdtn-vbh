@@ -1,0 +1,17 @@
+# Builds the app and runs the self-test on a clean macOS. What it cannot run is `--eval`: that types the test
+# texts in every layout enabled on the machine, and a runner has only one. Locally `./test.sh` does both.
+# The self-test does need the system Russian and English spellers (macOS ships both) and the Russian keyboard
+# layout installed, which is what `keyboardLayouts(installed: true)` asks for — not enabled, only installed.
+name: test
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  selftest:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: swift build -c release
+      - run: .build/release/LayoutSwitcher --selftest

@@ -100,7 +100,13 @@ func intendedLayout(for keys: [Key], current: Layout, others: [Layout], exceptio
                     learned: Set<String> = []) -> Layout? {
     let typed = current.translate(keys)
     guard typed.count >= 2, !exceptions.contains(bare(typed).lowercased()) else { return nil }
-    let readings = others.map { ($0, $0.translate(keys)) }.filter { $0.1.filter(\.isLetter).count >= 2 }
+    // Exceptions are written by hand as well as by us, and by hand the natural thing to write is the word as it
+    // ends up on screen ("девопсов"), not the keys that were pressed ("ltdjgcjd") — which is what the guard above
+    // compares. So a reading listed there drops out of the running. Only that one: with a third layout installed
+    // the others still get their say, which giving up here altogether would take from them.
+    let readings = others.map { ($0, $0.translate(keys)) }.filter {
+        $0.1.filter(\.isLetter).count >= 2 && (exceptions.isEmpty || !exceptions.contains(bare($0.1).lowercased()))
+    }
     // Plain words first: the speller reads "f[r" as the words "f" and "r", which must not beat the German "für".
     let candidates = readings.filter { $0.1.allSatisfy(\.isLetter) } + readings.filter { !$0.1.allSatisfy(\.isLetter) }
     // The speller skips punctuation, so ",fu" passes as the word "fu" — but , ; [ ' are letters in other
@@ -249,6 +255,9 @@ func selfTest() {
     precondition(us.translate(ghbdtn) == "ghbdtn" && ru.translate(ghbdtn) == "привет")
     precondition(intendedLayout(for: ghbdtn, current: us, others: [ru], exceptions: [])?.id == ru.id)
     precondition(intendedLayout(for: ghbdtn, current: us, others: [ru], exceptions: ["ghbdtn"]) == nil)
+    // The same exception written the way it looks on screen, which is how a hand-edited list gets written.
+    precondition(intendedLayout(for: ghbdtn, current: us, others: [ru], exceptions: ["привет"]) == nil)
+    precondition(intendedLayout(for: ghbdtn, current: us, others: [ru], exceptions: ["мир"])?.id == ru.id)
     precondition(intendedLayout(for: ghbdtn, current: ru, others: [us], exceptions: []) == nil)
     precondition(intendedLayout(for: hello, current: us, others: [ru], exceptions: []) == nil)
     precondition(intendedLayout(for: hello, current: ru, others: [us], exceptions: [])?.id == us.id)
@@ -310,6 +319,7 @@ func selfTest() {
         precondition(intendedLayout(for: fur, current: ru, others: [us, de], exceptions: [])?.id == de.id)
         precondition(intendedLayout(for: uber, current: us, others: [ru, de], exceptions: [])?.id == de.id)
         precondition(intendedLayout(for: uber, current: de, others: [us, ru], exceptions: []) == nil)
+        precondition(intendedLayout(for: uber, current: us, others: [ru, de], exceptions: ["über"]) == nil)
         precondition(convert("für", layouts: [de, ru])?.text == ru.translate(fur))
     }
     precondition(intendedLayout(for: keys([3, 33, 3, 33, 3]), current: ru, others: [us], exceptions: []) == nil)  // ахаха, not "f[f[f"

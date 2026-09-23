@@ -21,7 +21,7 @@ jobs:
       - run: .build/release/ghbdtnvbh --eval --layouts US,Russian Tests/stress-ru.txt Tests/stress-en.txt || true
       # Languages without a system speller: the tables alone. Common words and English must stay put; rare words are for the log.
       - run: |
-          for pair in hr:Croatian sk:Slovak et:Estonian mk:Macedonian sq:Albanian sr:Serbian-Latin fa:Persian ka:Georgian-QWERTY; do
+          for pair in fi:Finnish is:Icelandic nb:Norwegian pl:Polish lt:Lithuanian he:Hebrew hr:Croatian sk:Slovak et:Estonian mk:Macedonian sq:Albanian sr:Serbian-Latin fa:Persian ka:Georgian-QWERTY; do
             .build/release/ghbdtnvbh --eval --layouts "US,${pair#*:}" "Tests/common-${pair%%:*}.txt" Tests/chat-en.txt
             .build/release/ghbdtnvbh --eval --layouts "US,${pair#*:}" "Tests/stress-${pair%%:*}.txt" || true
           done

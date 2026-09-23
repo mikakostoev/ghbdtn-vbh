@@ -18,8 +18,9 @@ leave a comment saying you took it.
 
 - `./test.sh` — build, self-test and the runs on the test texts. `Tests/chat-*.txt` and `Tests/common-*.txt` must
   stay at **0 false switches**; if you changed the switching rules, attach the output before and after.
-  `common-xx` and `stress-xx` are the languages without a system dictionary (Croatian, Slovak, Estonian,
-  Macedonian, Albanian, Serbian, Farsi, Georgian), where the tables decide alone.
+  `common-xx` and `stress-xx` are the languages without a system dictionary (Finnish, Icelandic, Norwegian,
+  Polish, Lithuanian, Hebrew, Croatian, Slovak, Estonian, Macedonian, Albanian, Serbian, Farsi, Georgian), where
+  the tables decide alone. `--selftest` prints the spellers this Mac has; the set differs between macOS versions.
 - `Tests/live.sh` — live typing into a test window, if you touched the code around keyboard events or text
   replacement.
 - A new rule or a fixed case — add an example to the self-test (`--selftest`, in `Layouts.swift`) so it doesn't

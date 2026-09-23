@@ -34,6 +34,17 @@ final class Switcher: NSObject, NSApplicationDelegate, NSMenuDelegate {
     // MARK: App
 
     func applicationDidFinishLaunching(_ notification: Notification) {
+        // Spotlight finds the app by these words too, as the app itself: keywords in a bundle xattr are indexed
+        // like any file's. A reinstall drops the xattr and the next launch writes it back; a root-owned bundle
+        // just keeps its plain name.
+        let names = ["layout switcher", "привет мир", "privet mir", "privet", "mir", "раскладка", "переключатель раскладки"]
+        if Bundle.main.bundleURL.pathExtension == "app",
+           let plist = try? PropertyListSerialization.data(fromPropertyList: names, format: .binary, options: 0) {
+            _ = plist.withUnsafeBytes {
+                setxattr(Bundle.main.bundlePath, "com.apple.metadata:kMDItemKeywords", $0.baseAddress, plist.count, 0, 0)
+            }
+        }
+
         // An image, not the "⌨︎" glyph: only an image can be dimmed to show the switcher is doing nothing.
         statusItem.button?.image = NSImage(systemSymbolName: "keyboard", accessibilityDescription: "ghbdtn vbh")
         statusItem.button?.image?.isTemplate = true

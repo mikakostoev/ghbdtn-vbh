@@ -1,6 +1,6 @@
-# Every push to main that touches the app — a merged PR, in practice — becomes a release: the next patch version
-# is tagged, the universal zip is built on a clean runner with the same release.sh anyone can run at home, and
-# attached to the GitHub release of that tag. A tag pushed by hand (v2.1.0: a minor or major release) or
+# Every push to main that touches the app — a merged PR, in practice — becomes a release once the test workflow
+# passes on it: the next patch version is tagged, the universal zip is built on a clean runner with the same
+# release.sh anyone can run at home, and attached to the GitHub release of that tag. A tag pushed by hand (v2.1.0: a minor or major release) or
 # "Run workflow" with a version typed in does the same for that exact version.
 # So the file on the Releases page is the code in the repository, built by nobody's Mac in particular.
 #
@@ -33,7 +33,11 @@ permissions:
   contents: write
 
 jobs:
+  # The same checks as on every PR; nothing is released while one of them fails.
+  test:
+    uses: ./.github/workflows/test.yml
   release:
+    needs: test
     runs-on: macos-latest
     env:
       # `secrets` can't be read in an `if`; an env var can.

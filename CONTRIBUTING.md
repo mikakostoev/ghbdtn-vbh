@@ -38,8 +38,9 @@ leave a comment saying you took it.
 ## Releasing
 
 Merging to main is releasing: every push to main that touches the app (`Sources/`, `Resources/`, the build
-scripts) is tagged with the next patch version by the release workflow, which builds the universal zip with
-`release.sh` and attaches it to the GitHub release; the cask workflow then points `Casks/ghbdtn-vbh.rb` at it.
+scripts) is tagged with the next patch version by the release workflow once the test workflow has passed on it;
+the release workflow builds the universal zip with `release.sh` and attaches it to the GitHub release, and the
+cask workflow then points `Casks/ghbdtn-vbh.rb` at it.
 Docs-only changes release nothing. For a minor or major version, `git tag v2.1.0 && git push origin v2.1.0`
 on main (or "Run workflow" on the Actions page with the version typed in) does the same for that number, and
 patch releases continue from it. The build is

@@ -29,6 +29,6 @@ jobs:
           curl -sSLf -o app.zip "https://github.com/$GITHUB_REPOSITORY/releases/download/$TAG/ghbdtn-vbh-$V.zip"
           SHA=$(sha256sum app.zip | cut -d' ' -f1)
           sed -i -e "s/^  version \".*\"/  version \"$V\"/" -e "s/^  sha256 \".*\"/  sha256 \"$SHA\"/" Casks/ghbdtn-vbh.rb
-          git config user.name github-actions
-          git config user.email github-actions[bot]@users.noreply.github.com
+          git config user.name "Mikail Kostoev"
+          git config user.email mikail.kostoev.dev@gmail.com
           git diff --quiet || { git commit -am "Point the cask at $V" && git push; }

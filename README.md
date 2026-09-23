@@ -27,9 +27,12 @@ To fix only the last word, or the text you have selected, press Option twice (th
    ```bash
    brew tap mikakostoev/ghbdtn-vbh https://github.com/mikakostoev/ghbdtn-vbh && brew install --cask --no-quarantine ghbdtn-vbh
    ```
-   The cask points at the first release under the new name, 2.0.0.
    Or download the archive from [Releases](https://github.com/mikakostoev/ghbdtn-vbh/releases) and drag
    `ghbdtn vbh.app` into Applications.
+   **Upgrading from LayoutSwitcher:** remove the old app first, or you'll end up with two switchers fighting
+   over the same keystrokes — `brew uninstall --cask layoutswitcher --zap` if you installed it with Homebrew, or
+   drag `LayoutSwitcher.app` from Applications to the Trash otherwise. Switch "Open at login" back on in the new
+   app: that setting is tied to the old app's identity and doesn't carry over.
 2. **Grant access.** On first launch macOS blocks the app. Go to System Settings → Privacy & Security, click
    "Open Anyway", then allow the app under Accessibility. Without that it cannot see keystrokes.
 3. **Try it.** Open any text editor, type `ghbdtn` and press space.
@@ -163,7 +166,7 @@ To stop macOS from asking for Accessibility after every rebuild, create a free s
 certificate in Keychain Access named `LayoutSwitcher Local Signing` (Certificate Assistant). The scripts build
 and sign the app with it.
 
-A release is built with `./release.sh 1.1.0`, which produces the universal archive. A version tag on GitHub does
+A release is built with `./release.sh 2.0.0`, which produces the universal archive. A version tag on GitHub does
 exactly the same and attaches the file to the release.
 
 ## Making sure it works

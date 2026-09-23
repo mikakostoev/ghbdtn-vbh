@@ -166,8 +166,9 @@ To stop macOS from asking for Accessibility after every rebuild, create a free s
 certificate in Keychain Access named `LayoutSwitcher Local Signing` (Certificate Assistant). The scripts build
 and sign the app with it.
 
-A release is built with `./release.sh 2.0.0`, which produces the universal archive. A version tag on GitHub does
-exactly the same and attaches the file to the release.
+A release is built with `./release.sh 2.0.0`, which produces the universal archive. On GitHub, every merge to
+main that changes the app does exactly the same under the next patch version and attaches the file to the
+release; a pushed version tag does it for that version.
 
 ## Making sure it works
 

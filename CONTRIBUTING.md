@@ -37,8 +37,13 @@ leave a comment saying you took it.
 
 ## Releasing
 
-`git tag v2.1.0 && git push origin v2.1.0`. The release workflow builds the universal zip with `release.sh`,
-attaches it to the GitHub release, and the cask workflow points `Casks/ghbdtn-vbh.rb` at it. The build is
+Merging to main is releasing: every push to main that touches the app (`Sources/`, `Resources/`, the build
+scripts) is tagged with the next patch version by the release workflow once the test workflow has passed on it;
+the release workflow builds the universal zip with `release.sh` and attaches it to the GitHub release, and the
+cask workflow then points `Casks/ghbdtn-vbh.rb` at it.
+Docs-only changes release nothing. For a minor or major version, `git tag v2.1.0 && git push origin v2.1.0`
+on main (or "Run workflow" on the Actions page with the version typed in) does the same for that number, and
+patch releases continue from it. The build is
 ad-hoc-signed until `DEVELOPER_ID_P12` is set; once it is, the other four secrets listed at the top of
 `.github/workflows/release.yml` must be set too, or the run fails — with all five, the same tag comes out
 signed with a Developer ID, notarized and stapled, and macOS opens it without "Open Anyway". Nothing in the

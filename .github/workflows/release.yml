@@ -1,5 +1,7 @@
-# A tag v2.0.0 builds the universal zip on a clean runner with the same release.sh anyone can run at home,
-# and attaches it to the GitHub release of that tag (creating the release if the tag was pushed bare).
+# Every push to main that touches the app — a merged PR, in practice — becomes a release once the test workflow
+# passes on it: the next patch version is tagged, the universal zip is built on a clean runner with the same
+# release.sh anyone can run at home, and attached to the GitHub release of that tag. A tag pushed by hand (v2.1.0: a minor or major release) or
+# "Run workflow" with a version typed in does the same for that exact version.
 # So the file on the Releases page is the code in the repository, built by nobody's Mac in particular.
 #
 # Signing. Without secrets the build is ad-hoc and Gatekeeper asks for "Open Anyway". Add these repository
@@ -14,18 +16,53 @@ name: release
 on:
   push:
     tags: ["v*"]
+    branches: [main]
+    # Only the app itself: a docs change, or the cask bump that follows every release, must not release again.
+    # (Tag pushes are not filtered by paths.)
+    paths: [Sources/**, Resources/**, Package.swift, build.sh, release.sh, Tools/icon.swift]
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Version to release, e.g. 2.1.0 (empty: the next patch)"
+        required: false
+
+# One release at a time, so that two merges in a row get two numbers.
+concurrency: release
 
 permissions:
   contents: write
 
 jobs:
+  # The same checks as on every PR; nothing is released while one of them fails.
+  test:
+    uses: ./.github/workflows/test.yml
   release:
+    needs: test
     runs-on: macos-latest
     env:
       # `secrets` can't be read in an `if`; an env var can.
       P12: ${{ secrets.DEVELOPER_ID_P12 }}
     steps:
       - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0  # the tags, to count the next version from
+      - name: Pick the version
+        env:
+          WANTED: ${{ inputs.version }}
+        run: |
+          if [ "$GITHUB_REF_TYPE" = tag ]; then
+            TAG="$GITHUB_REF_NAME"
+          else
+            if [ -n "$WANTED" ]; then
+              TAG="v${WANTED#v}"
+            else
+              LAST=$(git tag -l 'v*' --sort=-v:refname | head -1); LAST="${LAST:-v0.0.0}"
+              TAG="${LAST%.*}.$(( ${LAST##*.} + 1 ))"
+            fi
+            # Pushed with the workflow token, so the tag starts no second run of this workflow.
+            git tag "$TAG" && git push origin "$TAG"
+          fi
+          echo "TAG=$TAG" >> "$GITHUB_ENV"
       - name: Import the Developer ID certificate
         if: env.P12 != ''
         env:
@@ -42,7 +79,7 @@ jobs:
             { echo "no Developer ID Application identity in the .p12"; exit 1; }
           ID=$(security find-identity -v -p codesigning build.keychain | grep -o '"Developer ID Application: [^"]*"' | head -1 | tr -d '"')
           echo "IDENTITY=$ID" >> "$GITHUB_ENV"
-      - run: ./release.sh "${GITHUB_REF_NAME#v}"
+      - run: ./release.sh "${TAG#v}"
       - name: Notarize and staple
         if: env.P12 != ''
         env:
@@ -50,13 +87,13 @@ jobs:
           TEAM_ID: ${{ secrets.NOTARY_TEAM_ID }}
           PASSWORD: ${{ secrets.NOTARY_PASSWORD }}
         run: |
-          V="${GITHUB_REF_NAME#v}"
+          V="${TAG#v}"
           xcrun notarytool submit "dist/ghbdtn-vbh-$V.zip" --apple-id "$APPLE_ID" --team-id "$TEAM_ID" --password "$PASSWORD" --wait
           xcrun stapler staple "dist/ghbdtn vbh.app"
           rm "dist/ghbdtn-vbh-$V.zip"
           ditto -c -k --keepParent "dist/ghbdtn vbh.app" "dist/ghbdtn-vbh-$V.zip"
       - run: |
-          gh release upload "$GITHUB_REF_NAME" dist/ghbdtn-vbh-*.zip --clobber ||
-          gh release create "$GITHUB_REF_NAME" dist/ghbdtn-vbh-*.zip --title "ghbdtn vbh ${GITHUB_REF_NAME#v}" --generate-notes
+          gh release upload "$TAG" dist/ghbdtn-vbh-*.zip --clobber ||
+          gh release create "$TAG" dist/ghbdtn-vbh-*.zip --title "ghbdtn vbh ${TAG#v}" --generate-notes
         env:
           GH_TOKEN: ${{ github.token }}

@@ -18,12 +18,15 @@ jobs:
     if: github.event_name == 'release' || github.event.workflow_run.conclusion == 'success'
     runs-on: ubuntu-latest
     env:
-      TAG: ${{ github.event.release.tag_name || github.event.workflow_run.head_branch }}
+      TAG: ${{ github.event.release.tag_name }}
+      GH_TOKEN: ${{ github.token }}
     steps:
       - uses: actions/checkout@v5
         with:
           ref: main
       - run: |
+          # After the release workflow, the release it just made is the newest one.
+          TAG="${TAG:-$(gh release view --json tagName -q .tagName)}"
           case "$TAG" in v*) ;; *) echo "not a release tag: $TAG"; exit 0;; esac
           V="${TAG#v}"
           curl -sSLf -o app.zip "https://github.com/$GITHUB_REPOSITORY/releases/download/$TAG/ghbdtn-vbh-$V.zip"

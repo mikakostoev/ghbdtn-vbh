@@ -88,15 +88,17 @@ the system dictionary and the built-in letter statistics (available for 35 langu
 it works and where it doesn't.
 
 **Works like Russian and English do:** Ukrainian, German, French, Spanish, Italian, Portuguese, Dutch, Danish,
-Norwegian, Swedish, Finnish, Icelandic, Czech, Polish, Hungarian, Romanian, Bulgarian, Greek, Turkish,
-Lithuanian, Hebrew, Arabic. Only Russian, English, Ukrainian and German are checked on texts; the others use the
-same mechanism.
+Swedish, Czech, Hungarian, Romanian, Bulgarian, Greek, Turkish, Arabic. Only Russian, English, Ukrainian and
+German are checked on texts; the others use the same mechanism.
 
 **Works poorly:**
 
-- *Languages without a system dictionary* — Croatian, Slovak, Estonian, Macedonian, Albanian, Serbian, Farsi,
-  Georgian. Letter statistics decide alone: common words are held without a single error, rare words and names
-  see 2–9 false switches per three thousand (see `Tests/stress-*.txt`).
+- *Languages without a system dictionary* — Finnish, Icelandic, Norwegian, Polish, Lithuanian, Hebrew,
+  Croatian, Slovak, Estonian, Macedonian, Albanian, Serbian, Farsi, Georgian. Letter statistics decide alone:
+  common words are held without a single error, rare words and names see 2–14 false switches per three thousand
+  (see `Tests/stress-*.txt`). Which dictionaries macOS ships differs between versions, so the list is what this
+  Mac reports: `ghbdtnvbh --selftest` prints the spellers it found, and a language missing from that line lands
+  in this group.
 - *Layouts whose letters match the English ones* — Croatian, Slovak, Estonian, Czech, Polish, Hungarian. Typed
   on the English layout, only č, š, ő and the like come out wrong, and such words are not fixed. The other way
   works: an English word typed on such a layout switches the layout back.
@@ -105,6 +107,9 @@ same mechanism.
 - *Languages without a layout of their own* — Indonesian, Catalan, Basque, Esperanto. They are typed on the
   English or Spanish layout, so the app takes them for English or Spanish: hardly any false switches, but no
   dictionary protects their words either.
+- *Words the system dictionary has learned from you* — the names of installed apps, contacts and anything
+  taught with «Learn Spelling» pass as words in every language, so typed in the wrong layout they stay put: the
+  app trusts the dictionary. The one exception it makes is its own name — `ghbdtn` and `vbh` switch regardless.
 
 **Doesn't work:**
 

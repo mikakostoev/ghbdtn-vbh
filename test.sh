@@ -15,8 +15,10 @@ $BIN --eval Tests/chat-ru.txt Tests/chat-en.txt
 $BIN --eval Tests/stress-ru.txt Tests/stress-en.txt || true
 # Languages without a system speller, where the tables decide alone. Common words (top 2000 of the lists) and the
 # English chat typed against that layout: 0 false. Rare words, for the log: English words that sit inside the
-# foreign lists count as false there. Baseline 2026-09-23: 2-9 false per language.
-for pair in hr:Croatian sk:Slovak et:Estonian mk:Macedonian sq:Albanian sr:Serbian-Latin fa:Persian ka:Georgian-QWERTY; do
+# foreign lists count as false there. Baseline 2026-09-23: 2-14 false per language.
+# Which languages land here depends on the macOS version: --selftest prints the spellers it found, and a
+# language missing from that line belongs in this loop. These fourteen are what macOS 26 leaves without one.
+for pair in fi:Finnish is:Icelandic nb:Norwegian pl:Polish lt:Lithuanian he:Hebrew hr:Croatian sk:Slovak et:Estonian mk:Macedonian sq:Albanian sr:Serbian-Latin fa:Persian ka:Georgian-QWERTY; do
     $BIN --eval --layouts "US,${pair#*:}" "Tests/common-${pair%%:*}.txt" Tests/chat-en.txt
     $BIN --eval --layouts "US,${pair#*:}" "Tests/stress-${pair%%:*}.txt" || true
 done

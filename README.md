@@ -104,6 +104,9 @@ German are checked on texts; the others use the same mechanism.
 - *Languages without a layout of their own* — Indonesian, Catalan, Basque, Esperanto. They are typed on the
   English or Spanish layout, so the app takes them for English or Spanish: hardly any false switches, but no
   dictionary protects their words either.
+- *Words the system dictionary has learned from you* — the names of installed apps, contacts and anything
+  taught with «Learn Spelling» pass as words in every language, so typed in the wrong layout they stay put: the
+  app trusts the dictionary. The one exception it makes is its own name — `ghbdtn` and `vbh` switch regardless.
 
 **Doesn't work:**
 

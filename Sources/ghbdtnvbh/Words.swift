@@ -4,6 +4,11 @@
 /// a dictionary word, or adding it would stop that word from being fixed ("jq" reads "ой", "vtk" reads "мел").
 /// The dictionary can't see every collision — "vue" is left out by hand because it reads "мгу".
 // ponytail: exact forms only ("дебажить" but not "дебажу"); learning covers the forms a user actually types.
+/// The app's own name. macOS files the names of installed apps into the personal lexicon its speller consults
+/// (LaunchServices -> IntelligencePlatform -> AppleSpell), so on a Mac with the app installed "ghbdtn" and "vbh"
+/// pass as words in every language and the headline example would never switch. The speller is not asked about them.
+let ownName: Set<String> = ["ghbdtn", "vbh"]
+
 let extraWords: [String: Set<String>] = [
     "en": words("""
         aac aliexpress antd api archlinux argparse asciidoctor asciinema async asyncio aws awscli azcopy backend

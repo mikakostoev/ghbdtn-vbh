@@ -70,8 +70,9 @@ private func isWord(_ text: String, lang: String, learned: Set<String> = [], asT
     if forms.contains(where: listed) { return true }
     guard hasSpeller(lang) else { return nil }
     return ([text] + forms.dropFirst()).contains {
-        NSSpellChecker.shared.checkSpelling(of: $0, startingAt: 0, language: lang, wrap: false,
-                                            inSpellDocumentWithTag: 0, wordCount: nil).location == NSNotFound
+        !ownName.contains(bare($0).lowercased())
+            && NSSpellChecker.shared.checkSpelling(of: $0, startingAt: 0, language: lang, wrap: false,
+                                                   inSpellDocumentWithTag: 0, wordCount: nil).location == NSNotFound
     }
 }
 

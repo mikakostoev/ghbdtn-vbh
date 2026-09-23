@@ -1,14 +1,10 @@
 // Draws the app icon into an .iconset directory: `icon <output.iconset>`. Run by build.sh, so the icon stays
 // something you can read and change rather than a binary blob in the repository.
 //
-// The picture is the app itself: one key, split down the diagonal into the Latin half and the Cyrillic one.
-// At 16 px in the Accessibility list the letters are gone and only the split is left, which is the point —
-// a program asking to watch every keystroke should at least be recognisable there.
+// The picture is the Figma one (file FGEXjUGH7Y5HcG7N8I6CTz, node 13:3): "vbh" in Helvetica Bold Oblique, black on
+// white: «мир» typed in the wrong layout, the second half of the name. The key shape and its margin
+// stay macOS's own, so the icon sits in line with the others in the Dock and in the Accessibility list.
 import AppKit
-
-let light = NSColor(srgbRed: 0.961, green: 0.961, blue: 0.969, alpha: 1)
-let accent = NSColor(srgbRed: 0.157, green: 0.412, blue: 0.898, alpha: 1)
-let ink = NSColor(srgbRed: 0.106, green: 0.114, blue: 0.129, alpha: 1)
 
 func draw(side: CGFloat) -> NSBitmapImageRep {
     let rep = NSBitmapImageRep(bitmapDataPlanes: nil, pixelsWide: Int(side), pixelsHigh: Int(side),
@@ -21,30 +17,16 @@ func draw(side: CGFloat) -> NSBitmapImageRep {
     // macOS leaves the artwork a margin of its own inside the canvas; the corner radius is Big Sur's squircle.
     let inset = side * 0.094, box = NSRect(x: inset, y: inset, width: side - 2 * inset, height: side - 2 * inset)
     let key = NSBezierPath(roundedRect: box, xRadius: box.width * 0.2237, yRadius: box.width * 0.2237)
-    light.setFill()
+    NSColor.white.setFill()
     key.fill()
 
-    NSGraphicsContext.saveGraphicsState()
-    key.addClip()
-    let half = NSBezierPath()
-    half.move(to: NSPoint(x: box.minX, y: box.minY))
-    half.line(to: NSPoint(x: box.maxX, y: box.minY))
-    half.line(to: NSPoint(x: box.maxX, y: box.maxY))
-    half.close()
-    accent.setFill()
-    half.fill()
-    NSGraphicsContext.restoreGraphicsState()
+    // Figma: 232 pt text on a 512 pt key, centred.
+    let font = NSFont(name: "Helvetica-BoldOblique", size: box.width * 232 / 512)!
+    let text = NSAttributedString(string: "vbh", attributes: [.font: font, .foregroundColor: NSColor.black])
+    let size = text.size()
+    text.draw(at: NSPoint(x: box.midX - size.width / 2, y: box.midY - size.height / 2))
 
-    func letter(_ text: String, color: NSColor, at point: NSPoint) {
-        let font = NSFont.systemFont(ofSize: box.width * 0.42, weight: .bold)
-        let string = NSAttributedString(string: text, attributes: [.font: font, .foregroundColor: color])
-        let size = string.size()
-        string.draw(at: NSPoint(x: point.x - size.width / 2, y: point.y - size.height / 2))
-    }
-    letter("A", color: ink, at: NSPoint(x: box.minX + box.width * 0.31, y: box.minY + box.height * 0.68))
-    letter("Я", color: .white, at: NSPoint(x: box.minX + box.width * 0.69, y: box.minY + box.height * 0.32))
-
-    // Keeps the light half from bleeding into a white background.
+    // Keeps the white key from bleeding into a white background.
     NSColor(white: 0, alpha: 0.12).setStroke()
     key.lineWidth = max(1, side * 0.004)
     key.stroke()

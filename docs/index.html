@@ -35,11 +35,7 @@ a:hover, a:focus-visible { text-decoration: underline; text-underline-offset: .1
 section { display: flex; flex-direction: column; justify-content: center; min-height: 100svh; padding: var(--py) var(--pad); text-wrap: pretty; scroll-snap-align: start; scroll-snap-stop: always; }
 
 .hero { align-items: center; overflow: hidden; }
-/* Both phrases of the current example sit, invisible, in the line's grid cell: the line is as wide as the longer
-   one, so once centred it doesn't shift while letters appear or change. */
-.type { display: grid; font-size: var(--type); font-weight: 400; line-height: 1; white-space: pre; }
-.type > * { grid-area: 1 / 1; }
-.ghost { visibility: hidden; padding-right: calc(var(--cursor) + .02em); }
+.type { font-size: var(--type); font-weight: 400; line-height: 1; white-space: pre; }
 .line, .word, .cursor { display: flex; }
 .line { align-items: center; }
 /* A misspelled word's red squiggle, one continuous wave under the whole phrase. */
@@ -69,8 +65,6 @@ section { display: flex; flex-direction: column; justify-content: center; min-he
 <main>
 <section class="hero">
   <h1 class="type" aria-label="ghbdtn vbh → привет мир">
-    <span class="ghost" aria-hidden="true">ghbdtn vbh</span>
-    <span class="ghost" aria-hidden="true">привет мир</span>
     <span class="line" aria-hidden="true"><span class="word">ghbdtn vbh</span><span class="cursor"><i></i><b hidden>EN</b></span></span>
   </h1>
 </section>
@@ -98,26 +92,35 @@ section { display: flex; flex-direction: column; justify-content: center; min-he
 (() => {
   if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
   const examples = [['ghbdtn vbh', 'привет мир', 'EN', 'RU'], ['руддщ цщкдв', 'hello world', 'RU', 'EN'], ['ltdjgcjd', 'девопсов', 'EN', 'RU']];
-  const type = document.querySelector('.type'), ghosts = type.querySelectorAll('.ghost'), line = type.querySelector('.line'),
-        word = type.querySelector('.word'), badge = type.querySelector('b');
+  const type = document.querySelector('.type'), line = type.querySelector('.line'), word = type.querySelector('.word'),
+        badge = type.querySelector('b');
   const sleep = ms => new Promise(done => setTimeout(done, ms));
+  // The line stays centred on whatever it holds: when it gets wider or narrower, it jumps to its new place and
+  // is animated back from the old one, so the text glides there instead.
+  let gliding;
+  const glide = change => {
+    const before = line.getBoundingClientRect().left;
+    gliding?.cancel();
+    change();
+    const shift = before - line.getBoundingClientRect().left;
+    if (shift) gliding = line.animate([{ transform: `translateX(${shift}px)` }, { transform: 'none' }],
+      { duration: 220, easing: 'cubic-bezier(.2, .8, .2, 1)' });
+  };
   // The old glyph leaves upwards, the new one comes in from below.
   const flip = (el, text) => el.animate([{ transform: 'none', opacity: 1 }, { transform: 'translateY(-.35em)', opacity: 0 }],
       { duration: 90, easing: 'ease-in' }).finished.then(() => {
-    el.textContent = text;
+    glide(() => el.textContent = text);
     el.animate([{ transform: 'translateY(.35em)', opacity: 0 }, { transform: 'none', opacity: 1 }],
       { duration: 160, easing: 'cubic-bezier(.2, .8, .2, 1)' });
   });
 
   async function play([typed, fixed, from, to]) {
-    ghosts[0].textContent = typed;
-    ghosts[1].textContent = fixed;
     word.textContent = '';
     badge.textContent = from;
     await sleep(400);
     for (const ch of typed) {
       await sleep(ch === ' ' ? 200 + Math.random() * 80 : 70 + Math.random() * 110);
-      word.append(Object.assign(document.createElement('span'), { textContent: ch }));
+      glide(() => word.append(Object.assign(document.createElement('span'), { textContent: ch })));
     }
     await sleep(250);
     type.classList.add('wrong');

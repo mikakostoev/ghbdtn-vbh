@@ -1,3 +1,7 @@
+<div align="center">
+
+<img src="docs/icon.svg" width="128" height="128" alt="">
+
 # ghbdtn vbh → привет мир
 
 [![test](https://github.com/mikakostoev/ghbdtn-vbh/actions/workflows/test.yml/badge.svg)](https://github.com/mikakostoev/ghbdtn-vbh/actions/workflows/test.yml)
@@ -7,9 +11,12 @@
 [![Swift 5.9](https://img.shields.io/badge/Swift-5.9-F05138?logo=swift&logoColor=white)](Package.swift)
 [![license MIT](https://img.shields.io/github/license/mikakostoev/ghbdtn-vbh?label=license)](LICENSE)
 
+**[ghbdtnvbh.app](https://ghbdtnvbh.app)**
+
+</div>
+
 Keyboard layout auto-switcher for macOS. You type `ghbdtn vbh`, you get «привет мир». Free, open source, and
-nothing phones home: the app contains no networking code at all. Site:
-[mikakostoev.github.io/ghbdtn-vbh](https://mikakostoev.github.io/ghbdtn-vbh/).
+nothing phones home: the app contains no networking code at all.
 
 ## How it works
 

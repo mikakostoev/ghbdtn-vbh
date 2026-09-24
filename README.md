@@ -9,7 +9,7 @@
 
 Keyboard layout auto-switcher for macOS. You type `ghbdtn vbh`, you get «привет мир». Free, open source, and
 nothing phones home: the app contains no networking code at all. Site:
-[mikakostoev.github.io/ghbdtn-vbh](https://mikakostoev.github.io/ghbdtn-vbh/).
+[ghbdtnvbh.app](https://ghbdtnvbh.app/).
 
 ## How it works
 

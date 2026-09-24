@@ -1,0 +1,50 @@
+name: Wrong switch
+description: A word was switched when it shouldn't have been, or wasn't switched when it should
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        English or Russian is fine. Only paste text you are happy to make public.
+  - type: input
+    id: typed
+    attributes:
+      label: What you typed
+      placeholder: ghbdtn
+    validations:
+      required: true
+  - type: input
+    id: got
+    attributes:
+      label: What you got
+      placeholder: ghbdtn (nothing happened)
+    validations:
+      required: true
+  - type: input
+    id: expected
+    attributes:
+      label: What you expected
+      placeholder: привет
+    validations:
+      required: true
+  - type: input
+    id: layouts
+    attributes:
+      label: Your keyboard layouts
+      description: System Settings → Keyboard → Text Input → Input Sources
+      placeholder: ABC, Russian – PC
+    validations:
+      required: true
+  - type: input
+    id: app
+    attributes:
+      label: App or site where it happened
+      placeholder: Telegram, Safari on github.com
+  - type: input
+    id: version
+    attributes:
+      label: ghbdtn vbh and macOS versions
+      description: Menu bar icon → About ghbdtn vbh; Apple menu → About This Mac
+      placeholder: 2.0.1, macOS 26.0
+    validations:
+      required: true

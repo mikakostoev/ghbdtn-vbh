@@ -1,6 +1,9 @@
 <div align="center">
 
-<img src="docs/icon.svg" width="128" height="128" alt="">
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/icon-dark.png">
+  <img src="docs/icon-light.png" width="128" height="128" alt="">
+</picture>
 
 # ghbdtn vbh → привет мир
 

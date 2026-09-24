@@ -5,95 +5,141 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>ghbdtn vbh — keyboard layout auto-switcher for macOS</title>
 <meta name="description" content="You type ghbdtn vbh, you get привет мир. Free, open source, no networking code at all.">
+<meta name="color-scheme" content="light dark">
+<link rel="canonical" href="https://ghbdtnvbh.app/">
+<link rel="icon" href="icon-light.png" media="(prefers-color-scheme: light)">
+<link rel="icon" href="icon-dark.png" media="(prefers-color-scheme: dark)">
+<link rel="apple-touch-icon" href="icon-light.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500&display=swap">
 <style>
-:root { --bg: #f5f5f7; --ink: #1b1d21; --muted: #5c6068; --accent: #2869e5; --card: #ffffff; --line: #d9dbe0; }
-@media (prefers-color-scheme: dark) { :root { --bg: #1b1d21; --ink: #f5f5f7; --muted: #a0a4ad; --accent: #6fa0ff; --card: #25282e; --line: #3a3e46; } }
-* { box-sizing: border-box; }
-body { margin: 0; background: var(--bg); color: var(--ink); font: 17px/1.55 -apple-system, BlinkMacSystemFont, "Helvetica Neue", Arial, sans-serif; }
-main { max-width: 720px; margin: 0 auto; padding: 48px 20px 80px; }
-header { text-align: center; padding-bottom: 32px; }
-.logo { width: 96px; height: 96px; display: block; margin: 0 auto 16px; }
-h1 { font-size: 40px; margin: 0; letter-spacing: -0.02em; }
-.type { font: 700 32px/1.2 ui-monospace, "SF Mono", Menlo, monospace; color: var(--accent); min-height: 1.2em; margin: 8px 0 12px; }
-.type::after { content: "▍"; animation: blink 1s steps(1) infinite; color: var(--muted); }
-.type.fixed { color: var(--ink); }
-@keyframes blink { 50% { opacity: 0; } }
-.lead { color: var(--muted); margin: 0; }
-.lang { position: absolute; top: 16px; right: 20px; font-size: 15px; }
-a { color: var(--accent); }
-img { max-width: 100%; border-radius: 10px; border: 1px solid var(--line); display: block; margin: 0 auto; }
-h2 { font-size: 24px; margin: 48px 0 12px; }
-pre { background: var(--card); border: 1px solid var(--line); border-radius: 8px; padding: 12px 14px; overflow-x: auto; font: 14px/1.5 ui-monospace, "SF Mono", Menlo, monospace; }
-ul { padding-left: 22px; } li { margin: 6px 0; }
-.note { color: var(--muted); font-size: 15px; }
-footer { margin-top: 64px; color: var(--muted); font-size: 15px; text-align: center; }
+/* Type sizes come from the Figma frames: Small phone 320, Phone 390, Tablet 768, Laptop 1280, Desktop 1440, Ultrawide 1920. */
+:root {
+  --bg: #fff; --ink: #000; --line: #d8d8d8;
+  --type: 34px; --text: 19px; --cursor: 2px; --pad: 20px; --py: 64px; --gap: 40px; --gap2: 24px;
+}
+@media (prefers-color-scheme: dark) { :root { --bg: #000; --ink: #fff; --line: #2a2a2a; } }
+@media (min-width: 390px) { :root { --type: 42px; --text: 22px; --pad: 24px; } }
+@media (min-width: 768px) { :root { --type: 64px; --text: 30px; --pad: 48px; } }
+@media (min-width: 1280px) { :root { --type: 82px; --text: 38px; --cursor: 4px; --pad: 64px; --py: 96px; --gap: 64px; --gap2: 40px; } }
+@media (min-width: 1440px) { :root { --type: 94px; --text: 43px; } }
+@media (min-width: 1920px) { :root { --type: 124px; --text: 48px; --pad: 112px; } }
+
+* { box-sizing: border-box; margin: 0; }
+/* One block per screen, and a swipe or a wheel turn moves exactly one block, like slides. */
+html { scroll-snap-type: y mandatory; }
+body { background: var(--bg); color: var(--ink); font: 400 var(--text)/1.18 Inter, -apple-system, BlinkMacSystemFont, "Helvetica Neue", Arial, sans-serif; -webkit-font-smoothing: antialiased; }
+a { color: inherit; text-decoration: none; }
+a:hover, a:focus-visible { text-decoration: underline; text-underline-offset: .15em; text-decoration-thickness: .06em; }
+section { display: flex; flex-direction: column; justify-content: center; min-height: 100svh; padding: var(--py) var(--pad); text-wrap: pretty; scroll-snap-align: start; scroll-snap-stop: always; }
+
+.hero { align-items: center; overflow: hidden; }
+.type { font-size: var(--type); font-weight: 400; line-height: 1; white-space: pre; }
+.line, .word, .cursor { display: flex; }
+.line { align-items: center; }
+/* A misspelled word's red squiggle, one continuous wave under the whole phrase. */
+.word { position: relative; }
+.word::after { content: ""; position: absolute; left: 0; right: 0; bottom: .05em; height: .14em; opacity: 0; transition: opacity .15s;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 6 3'%3E%3Cpath d='M0 1.5Q1.5 0 3 1.5T6 1.5' fill='none' stroke='%23ff3b30' stroke-width='1.2'/%3E%3C/svg%3E") repeat-x 0 0 / .28em 100%; }
+.wrong .word::after { opacity: 1; }
+.cursor { position: relative; }
+.cursor i { width: var(--cursor); height: .92em; margin-left: .02em; background: currentColor; }
+.idle .cursor i { animation: blink .48s step-end infinite; }
+@keyframes blink { 0% { opacity: 0; } 50% { opacity: 1; } }
+/* The input source badge macOS shows under the caret. */
+.cursor b { position: absolute; top: calc(100% + .3em); left: 0; translate: -50% 0; padding: .35em .5em; border-radius: .45em;
+  background: var(--ink); color: var(--bg); font: 500 max(11px, .2em)/1 Inter, -apple-system, sans-serif; letter-spacing: .03em; }
+
+@media (min-width: 1280px) { .intro p { margin-left: 50%; } }
+
+.about { gap: var(--gap); line-height: 1.22; }
+.about h2 { font: inherit; line-height: 1.2; }
+.about div { display: flex; flex-direction: column; gap: var(--gap2); }
+
+.cta { align-items: center; line-height: normal; }
+.cta.line { border-top: 1px solid var(--line); }
 </style>
 </head>
 <body>
-<a class="lang" href="ru/">Русский</a>
 <main>
-<header>
-  <svg class="logo" viewBox="0 0 100 100" role="img" aria-label="ghbdtn vbh icon">
-    <defs><clipPath id="key"><rect x="0" y="0" width="100" height="100" rx="22.4"/></clipPath></defs>
-    <rect width="100" height="100" rx="22.4" fill="#f5f5f7"/>
-    <polygon points="0,100 100,100 100,0" fill="#2869e5" clip-path="url(#key)"/>
-    <text x="31" y="32" font-size="42" font-weight="700" fill="#1b1d21" text-anchor="middle" dominant-baseline="central" font-family="-apple-system, Helvetica, Arial, sans-serif">A</text>
-    <text x="69" y="68" font-size="42" font-weight="700" fill="#ffffff" text-anchor="middle" dominant-baseline="central" font-family="-apple-system, Helvetica, Arial, sans-serif">Я</text>
-    <rect width="100" height="100" rx="22.4" fill="none" stroke="rgba(0,0,0,.12)" stroke-width="1"/>
-  </svg>
-  <h1>ghbdtn vbh</h1>
-  <p class="type" id="type">привет мир</p>
-  <p class="lead">Keyboard layout auto-switcher for macOS. Free, open source, and nothing phones home.</p>
-</header>
+<section class="hero">
+  <h1 class="type" aria-label="ghbdtn vbh → привет мир">
+    <span class="line" aria-hidden="true"><span class="word">ghbdtn vbh</span><span class="cursor"><i></i><b hidden>EN</b></span></span>
+  </h1>
+</section>
 
-<img src="demo.gif" alt="Typed ghbdtn rfr ltkf hello — the screen shows привет как дела hello" width="800">
+<section class="intro">
+  <p>ghbdtn vbh - a simple project that I think is most useful and that I use in my daily life, it helps save me a little time and a bunch of stress</p>
+</section>
 
-<h2>Install</h2>
-<pre>brew tap mikakostoev/ghbdtn-vbh https://github.com/mikakostoev/ghbdtn-vbh &amp;&amp; brew install --cask --no-quarantine ghbdtn-vbh</pre>
-<p>Or <a href="https://github.com/mikakostoev/ghbdtn-vbh/releases/latest">download the zip</a> and drag <code>ghbdtn vbh.app</code> into Applications. macOS 13 or newer, Apple silicon and Intel.</p>
-<p class="note">On first launch macOS blocks the app: click “Open Anyway” in System Settings → Privacy &amp; Security, then allow it under Accessibility. The app opens a window that walks you through it. There is no paid Apple certificate behind the build, so the same permission is asked again after an update.</p>
-<p class="note">Upgrading from LayoutSwitcher: remove the old app first — <code>brew uninstall --cask layoutswitcher --zap</code>, or drag <code>LayoutSwitcher.app</code> to the Trash — otherwise both switchers stay running and fight over the same keystrokes. Turn “Open at login” back on in the new app; that setting doesn't carry over.</p>
+<section class="about">
+  <h2>About the project</h2>
+  <div>
+    <p>You start typing in one language while the keyboard is still in another layout and the app fixes the word on the spot.</p>
+    <p>ghbdtn rfr ltkf hello becomes «привет как дела hello».</p>
+    <p>It works with any keyboard layout macOS knows, not only Russian and English</p>
+  </div>
+</section>
 
-<h2>What it does</h2>
-<ul>
-  <li>Fixes the word on the spot: <code>ghbdtn</code> → «привет», <code>руддщ</code> → «hello». Any layout macOS knows, not only Russian and English.</li>
-  <li>Knows slang and names the system dictionary doesn't, from letter statistics: <code>ltdjgcjd</code> → «девопсов».</li>
-  <li>Copes with Caps Lock, abbreviations, identifiers like <code>getUserName</code>, numbers and stretched words.</li>
-  <li>Double Option converts the last word or your selection by hand.</li>
-  <li>Exceptions per word, per app and per site.</li>
-</ul>
-
-<h2>Why it can be trusted with your keyboard</h2>
-<ul>
-  <li><strong>No network, none.</strong> No updates, statistics, licence checks or crash reports. One <code>grep</code> over the source finds no networking library.</li>
-  <li><strong>The code is short and open.</strong> About a thousand lines of Swift, readable in an evening.</li>
-  <li><strong>Nothing you type is kept.</strong> Memory holds the word you are typing and at most three short words before it. Never written to disk.</li>
-  <li><strong>Passwords are off limits.</strong> In a secure field the app does not look at the keys at all.</li>
-  <li><strong>Three plain text files</strong> in Application Support: your exceptions, learned words and excluded sites. All visible in Settings.</li>
-</ul>
-
-<h2>Languages</h2>
-<p>Works like Russian and English do: Ukrainian, German, French, Spanish, Italian, Portuguese, Dutch, Danish, Norwegian, Swedish, Finnish, Icelandic, Czech, Polish, Hungarian, Romanian, Bulgarian, Greek, Turkish, Lithuanian, Hebrew, Arabic. Only Russian, English, Ukrainian and German are actually checked on texts; the others use the same mechanism.</p>
-<p class="note">Weaker without a system dictionary (Croatian, Slovak, Estonian, Macedonian, Albanian, Serbian, Farsi, Georgian) and for layouts that share letters with English. Doesn't work for input methods (Chinese, Japanese, Korean), scripts without spaces, and dead-key layouts. The honest list is in the <a href="https://github.com/mikakostoev/ghbdtn-vbh#languages">README</a>.</p>
-
-<footer>
-  <a href="https://github.com/mikakostoev/ghbdtn-vbh">GitHub</a> ·
-  <a href="https://github.com/mikakostoev/ghbdtn-vbh/releases">Releases</a> ·
-  <a href="https://github.com/mikakostoev/ghbdtn-vbh/blob/main/LICENSE">MIT</a> ·
-  <a href="https://github.com/mikakostoev/ghbdtn-vbh/blob/main/NOTICE.md">Notice</a>
-</footer>
+<section class="cta line"><a href="https://github.com/mikakostoev/ghbdtn-vbh/releases/latest">Download</a></section>
+<section class="cta"><a href="https://github.com/mikakostoev">About me</a></section>
 </main>
 <script>
-(function () {
-  var el = document.getElementById('type'), typed = 'ghbdtn vbh', fixed = 'привет мир', i = 0;
-  function step() {
-    if (i <= typed.length) { el.textContent = typed.slice(0, i++); setTimeout(step, 110); return; }
-    setTimeout(function () {
-      el.textContent = fixed; el.classList.add('fixed');
-      setTimeout(function () { i = 0; el.classList.remove('fixed'); step(); }, 2600);
-    }, 400);
+// Three examples on a loop. Each is typed with a human rhythm in the wrong layout, gets the red squiggle of a
+// misspelling, then is fixed key by key: every letter turns, left to right, into the one on the same key in the
+// other layout, and the input source badge under the caret switches with it.
+(() => {
+  if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  const examples = [['ghbdtn vbh', 'привет мир', 'EN', 'RU'], ['руддщ цщкдв', 'hello world', 'RU', 'EN'], ['ltdjgcjd', 'девопсов', 'EN', 'RU']];
+  const type = document.querySelector('.type'), line = type.querySelector('.line'), word = type.querySelector('.word'),
+        badge = type.querySelector('b');
+  const sleep = ms => new Promise(done => setTimeout(done, ms));
+  // The line stays centred on whatever it holds: when it gets wider or narrower, it jumps to its new place and
+  // is animated back from the old one, so the text glides there instead.
+  let gliding;
+  const glide = change => {
+    const before = line.getBoundingClientRect().left;
+    gliding?.cancel();
+    change();
+    const shift = before - line.getBoundingClientRect().left;
+    if (shift) gliding = line.animate([{ transform: `translateX(${shift}px)` }, { transform: 'none' }],
+      { duration: 220, easing: 'cubic-bezier(.2, .8, .2, 1)' });
+  };
+  // The old glyph leaves upwards, the new one comes in from below.
+  const flip = (el, text) => el.animate([{ transform: 'none', opacity: 1 }, { transform: 'translateY(-.35em)', opacity: 0 }],
+      { duration: 90, easing: 'ease-in' }).finished.then(() => {
+    glide(() => el.textContent = text);
+    el.animate([{ transform: 'translateY(.35em)', opacity: 0 }, { transform: 'none', opacity: 1 }],
+      { duration: 160, easing: 'cubic-bezier(.2, .8, .2, 1)' });
+  });
+
+  async function play([typed, fixed, from, to]) {
+    word.textContent = '';
+    badge.textContent = from;
+    await sleep(400);
+    for (const ch of typed) {
+      await sleep(ch === ' ' ? 200 + Math.random() * 80 : 70 + Math.random() * 110);
+      glide(() => word.append(Object.assign(document.createElement('span'), { textContent: ch })));
+    }
+    await sleep(250);
+    type.classList.add('wrong');
+    await sleep(350);
+    type.classList.remove('wrong');
+    flip(badge, to);
+    [...word.children].forEach((letter, i) => setTimeout(() => flip(letter, fixed[i]), i * 35));
+    await sleep(typed.length * 35 + 250);
+    type.classList.add('idle');
+    await sleep(1900);
+    const out = line.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 200, fill: 'forwards' });
+    await out.finished;
+    type.classList.remove('idle');
+    word.textContent = '';
+    out.cancel();
   }
-  step();
+
+  badge.hidden = false;
+  (async () => { for (let i = 0; ; i = (i + 1) % examples.length) await play(examples[i]); })();
 })();
 </script>
 </body>

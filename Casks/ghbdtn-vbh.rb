@@ -1,7 +1,7 @@
 # Version and sha256 are bumped by .github/workflows/cask.yml on every published release.
 cask "ghbdtn-vbh" do
-  version "2.0.1"
-  sha256 "5578009df3892df5161c779b82b32f05a6df61b628c5f1598a1445911226f367"
+  version "2.0.2"
+  sha256 "602b39d26146ed88b403fee66b22897c2091805d7d5b2cb9ff6d933ca20968d1"
 
   url "https://github.com/mikakostoev/ghbdtn-vbh/releases/download/v#{version}/ghbdtn-vbh-#{version}.zip"
   name "ghbdtn vbh"

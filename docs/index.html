@@ -35,16 +35,21 @@ a:hover, a:focus-visible { text-decoration: underline; text-underline-offset: .1
 section { display: flex; flex-direction: column; justify-content: center; min-height: 100svh; padding: var(--py) var(--pad); text-wrap: pretty; scroll-snap-align: start; scroll-snap-stop: always; }
 
 .hero { align-items: center; overflow: hidden; }
-/* Both phrases share one grid cell, so the line is as wide as the longer one and doesn't jump while letters appear. */
-.type { display: grid; font-size: var(--type); font-weight: 400; line-height: 1; white-space: nowrap; }
-.type > span { grid-area: 1 / 1; display: flex; align-items: center; }
-.type i { width: var(--cursor); height: .92em; margin-left: .02em; background: currentColor; }
-.cyrillic { opacity: 0; }
-.type.fixed .latin { opacity: 0; }
-.type.fixed .cyrillic { opacity: 1; }
-.type.fixed > span { transition: opacity .1s linear; }
-.type.fixed .cyrillic i { animation: blink .48s step-end .34s infinite; }
+.type { font-size: var(--type); font-weight: 400; line-height: 1; white-space: pre; }
+.line, .word, .cursor { display: flex; }
+.line { align-items: center; }
+/* A misspelled word's red squiggle, one continuous wave under the whole phrase. */
+.word { position: relative; }
+.word::after { content: ""; position: absolute; left: 0; right: 0; bottom: .05em; height: .14em; opacity: 0; transition: opacity .15s;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 6 3'%3E%3Cpath d='M0 1.5Q1.5 0 3 1.5T6 1.5' fill='none' stroke='%23ff3b30' stroke-width='1.2'/%3E%3C/svg%3E") repeat-x 0 0 / .28em 100%; }
+.wrong .word::after { opacity: 1; }
+.cursor { position: relative; }
+.cursor i { width: var(--cursor); height: .92em; margin-left: .02em; background: currentColor; }
+.idle .cursor i { animation: blink .48s step-end infinite; }
 @keyframes blink { 0% { opacity: 0; } 50% { opacity: 1; } }
+/* The input source badge macOS shows under the caret. */
+.cursor b { position: absolute; top: calc(100% + .3em); left: 0; translate: -50% 0; padding: .35em .5em; border-radius: .45em;
+  background: var(--ink); color: var(--bg); font: 500 max(11px, .2em)/1 Inter, -apple-system, sans-serif; letter-spacing: .03em; }
 
 @media (min-width: 1280px) { .intro p { margin-left: 50%; } }
 
@@ -60,8 +65,7 @@ section { display: flex; flex-direction: column; justify-content: center; min-he
 <main>
 <section class="hero">
   <h1 class="type" aria-label="ghbdtn vbh → привет мир">
-    <span class="latin" aria-hidden="true"><span id="typed">ghbdtn vbh</span><i></i></span>
-    <span class="cyrillic" aria-hidden="true">привет мир<i></i></span>
+    <span class="line" aria-hidden="true"><span class="word">ghbdtn vbh</span><span class="cursor"><i></i><b hidden>EN</b></span></span>
   </h1>
 </section>
 
@@ -82,19 +86,60 @@ section { display: flex; flex-direction: column; justify-content: center; min-he
 <section class="cta"><a href="https://github.com/mikakostoev">About me</a></section>
 </main>
 <script>
-// The Figma prototype's timeline, 4.6 s on a loop: a letter every 120 ms, the switch to Cyrillic at 1.48 s
-// (a 100 ms crossfade), then the cursor blinks until the next round.
-(function () {
-  var type = document.querySelector('.type'), typed = document.getElementById('typed'), word = typed.textContent;
+// Three examples on a loop. Each is typed with a human rhythm in the wrong layout, gets the red squiggle of a
+// misspelling, then is fixed key by key: every letter turns, left to right, into the one on the same key in the
+// other layout, and the input source badge under the caret switches with it.
+(() => {
   if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-  function cycle() {
-    type.classList.remove('fixed');
-    typed.textContent = '';
-    for (var i = 1; i <= word.length; i++) setTimeout(function (n) { typed.textContent = word.slice(0, n); }, i * 120, i);
-    setTimeout(function () { type.classList.add('fixed'); }, 1480);
+  const examples = [['ghbdtn vbh', 'привет мир', 'EN', 'RU'], ['руддщ цщкдв', 'hello world', 'RU', 'EN'], ['ltdjgcjd', 'девопсов', 'EN', 'RU']];
+  const type = document.querySelector('.type'), line = type.querySelector('.line'), word = type.querySelector('.word'),
+        badge = type.querySelector('b');
+  const sleep = ms => new Promise(done => setTimeout(done, ms));
+  // The line stays centred on whatever it holds: when it gets wider or narrower, it jumps to its new place and
+  // is animated back from the old one, so the text glides there instead.
+  let gliding;
+  const glide = change => {
+    const before = line.getBoundingClientRect().left;
+    gliding?.cancel();
+    change();
+    const shift = before - line.getBoundingClientRect().left;
+    if (shift) gliding = line.animate([{ transform: `translateX(${shift}px)` }, { transform: 'none' }],
+      { duration: 220, easing: 'cubic-bezier(.2, .8, .2, 1)' });
+  };
+  // The old glyph leaves upwards, the new one comes in from below.
+  const flip = (el, text) => el.animate([{ transform: 'none', opacity: 1 }, { transform: 'translateY(-.35em)', opacity: 0 }],
+      { duration: 90, easing: 'ease-in' }).finished.then(() => {
+    glide(() => el.textContent = text);
+    el.animate([{ transform: 'translateY(.35em)', opacity: 0 }, { transform: 'none', opacity: 1 }],
+      { duration: 160, easing: 'cubic-bezier(.2, .8, .2, 1)' });
+  });
+
+  async function play([typed, fixed, from, to]) {
+    word.textContent = '';
+    badge.textContent = from;
+    await sleep(400);
+    for (const ch of typed) {
+      await sleep(ch === ' ' ? 200 + Math.random() * 80 : 70 + Math.random() * 110);
+      glide(() => word.append(Object.assign(document.createElement('span'), { textContent: ch })));
+    }
+    await sleep(250);
+    type.classList.add('wrong');
+    await sleep(350);
+    type.classList.remove('wrong');
+    flip(badge, to);
+    [...word.children].forEach((letter, i) => setTimeout(() => flip(letter, fixed[i]), i * 35));
+    await sleep(typed.length * 35 + 250);
+    type.classList.add('idle');
+    await sleep(1900);
+    const out = line.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 200, fill: 'forwards' });
+    await out.finished;
+    type.classList.remove('idle');
+    word.textContent = '';
+    out.cancel();
   }
-  cycle();
-  setInterval(cycle, 4600);
+
+  badge.hidden = false;
+  (async () => { for (let i = 0; ; i = (i + 1) % examples.length) await play(examples[i]); })();
 })();
 </script>
 </body>

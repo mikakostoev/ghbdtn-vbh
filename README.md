@@ -1,8 +1,8 @@
 <div align="center">
 
 <picture>
-  <source media="(prefers-color-scheme: dark)" srcset="docs/icon-dark.png">
-  <img src="docs/icon-light.png" width="128" height="128" alt="">
+  <source media="(prefers-color-scheme: dark)" srcset="https://ghbdtnvbh.app/icon-dark.png">
+  <img src="https://ghbdtnvbh.app/icon-light.png" width="128" height="128" alt="">
 </picture>
 
 # ghbdtn vbh → привет мир
@@ -27,7 +27,7 @@ You start typing in one language while the keyboard is still in another layout �
 spot. `ghbdtn rfr ltkf hello` becomes «привет как дела hello». It works with any keyboard layout macOS knows,
 not only Russian and English ([details below](#languages)).
 
-![Typed ghbdtn rfr ltkf hello — the screen shows привет как дела hello](docs/demo.gif)
+![Typed ghbdtn rfr ltkf hello — the screen shows привет как дела hello](https://ghbdtnvbh.app/demo.gif)
 
 To fix only the last word, or the text you have selected, press Option twice (the shortcut is configurable).
 

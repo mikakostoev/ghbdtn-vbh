@@ -1,0 +1,5 @@
+# One page, nothing to hide. The sitemap line is the point of this file: it is how the crawler finds the map.
+User-agent: *
+Allow: /
+
+Sitemap: https://ghbdtnvbh.app/sitemap.xml

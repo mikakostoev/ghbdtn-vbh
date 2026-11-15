@@ -13,7 +13,7 @@ git clone https://github.com/mikakostoev/ghbdtn-vbh.git && cd ghbdtn-vbh
 Xcode or the Command Line Tools, macOS 13+. To install a release instead of building:
 
 ```bash
-brew tap mikakostoev/ghbdtn-vbh https://github.com/mikakostoev/ghbdtn-vbh && brew install --cask ghbdtn-vbh
+brew tap mikakostoev/ghbdtn-vbh https://github.com/mikakostoev/ghbdtn-vbh && brew trust --cask mikakostoev/ghbdtn-vbh/ghbdtn-vbh && brew install --cask ghbdtn-vbh
 ```
 
 To stop macOS from asking for Accessibility after every rebuild, create a free self-signed code-signing

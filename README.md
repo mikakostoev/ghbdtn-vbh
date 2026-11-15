@@ -10,7 +10,7 @@
 [![test](https://github.com/mikakostoev/ghbdtn-vbh/actions/workflows/test.yml/badge.svg)](https://github.com/mikakostoev/ghbdtn-vbh/actions/workflows/test.yml)
 [![release](https://img.shields.io/github/v/release/mikakostoev/ghbdtn-vbh?label=release)](https://github.com/mikakostoev/ghbdtn-vbh/releases/latest)
 [![downloads](https://img.shields.io/github/downloads/mikakostoev/ghbdtn-vbh/total?label=downloads)](https://github.com/mikakostoev/ghbdtn-vbh/releases)
-[![macOS 13+](https://img.shields.io/badge/macOS-13%2B-black?logo=apple)](#installation-in-detail)
+[![macOS 13+](https://img.shields.io/badge/macOS-13%2B-black?logo=apple)](#install)
 [![Swift 5.9](https://img.shields.io/badge/Swift-5.9-F05138?logo=swift&logoColor=white)](Package.swift)
 [![license MIT](https://img.shields.io/github/license/mikakostoev/ghbdtn-vbh?label=license)](LICENSE)
 
@@ -21,59 +21,38 @@
 Keyboard layout auto-switcher for macOS. You type `ghbdtn vbh`, you get «привет мир». Free, open source, and
 nothing phones home: the app contains no networking code at all.
 
-## How it works
-
 You start typing in one language while the keyboard is still in another layout — the app fixes the word on the
-spot. `ghbdtn rfr ltkf hello` becomes «привет как дела hello». It works with any keyboard layout macOS knows,
-not only Russian and English ([details below](#languages)).
+spot. `ghbdtn rfr ltkf hello` becomes «привет как дела hello». Double Option converts the last word or a
+selection (the shortcut is configurable). It works with any keyboard layout macOS knows, not only Russian
+and English ([languages](#languages)).
 
 ![Typed ghbdtn rfr ltkf hello — the screen shows привет как дела hello](https://ghbdtnvbh.app/demo.gif)
 
-To fix only the last word, or the text you have selected, press Option twice (the shortcut is configurable).
+## Install
 
-## Quick start
+```bash
+brew tap mikakostoev/ghbdtn-vbh https://github.com/mikakostoev/ghbdtn-vbh && brew install --cask ghbdtn-vbh
+```
 
-1. **Install.** The easiest way is Homebrew:
-   ```bash
-   brew tap mikakostoev/ghbdtn-vbh https://github.com/mikakostoev/ghbdtn-vbh && brew install --cask --no-quarantine ghbdtn-vbh
-   ```
-   Or download the archive from [Releases](https://github.com/mikakostoev/ghbdtn-vbh/releases) and drag
-   `ghbdtn vbh.app` into Applications.
-   **Upgrading from LayoutSwitcher:** remove the old app first, or you'll end up with two switchers fighting
-   over the same keystrokes — `brew uninstall --cask layoutswitcher --zap` if you installed it with Homebrew, or
-   drag `LayoutSwitcher.app` from Applications to the Trash otherwise. Switch "Open at login" back on in the new
-   app: that setting is tied to the old app's identity and doesn't carry over.
-2. **Grant access.** On first launch macOS blocks the app. Go to System Settings → Privacy & Security, click
-   "Open Anyway", then allow the app under Accessibility. Without that it cannot see keystrokes.
-3. **Try it.** Open any text editor, type `ghbdtn` and press space.
+Or download the archive from [Releases](https://github.com/mikakostoev/ghbdtn-vbh/releases) and drag
+`ghbdtn vbh.app` into Applications.
 
-Installation and building are covered [below](#installation-in-detail); how to help is in
-[CONTRIBUTING.md](CONTRIBUTING.md).
+On first launch macOS blocks the app: the build has no paid Apple certificate, and Homebrew no longer has a
+flag to skip quarantine (`--no-quarantine` was removed). Go to System Settings → Privacy & Security, click
+"Open Anyway", or right-click the icon → Open. From the command line the same step is
+`xattr -dr com.apple.quarantine "/Applications/ghbdtn vbh.app"`. Then allow the app under Accessibility.
+Without that it cannot see keystrokes.
 
-## Why it can be trusted with your keyboard
+Open any text editor, type `ghbdtn` and press space.
 
-The app sees everything you type; it cannot work otherwise. Here is why that is safe:
+**Upgrading from LayoutSwitcher:** remove the old app first, or you'll end up with two switchers fighting over
+the same keystrokes — `brew uninstall --cask layoutswitcher --zap` if you installed it with Homebrew, or drag
+`LayoutSwitcher.app` from Applications to the Trash otherwise. Switch "Open at login" back on in the new app:
+that setting is tied to the old app's identity and doesn't carry over.
 
-- **No network, none.** No updates, usage statistics, licence checks or crash reports. Easy to verify with a
-  command that looks for any networking library in the code — the output is empty:
-  ```bash
-  grep -rnE "URLSession|URLRequest|NWConnection|CFSocket|WebKit" Sources/
-  ```
-- **The code is short and open.** About a thousand lines of Swift in `Sources/` (not counting `Trigrams.swift`,
-  a generated table of numbers). It can be read in an evening.
-- **Nothing you type is kept.** Memory holds only the word you are typing right now (and at most three short
-  words before it). A mouse click, an arrow key or a window switch clears the buffer. It is never written to disk;
-  there is no typing log.
-- **Passwords are off limits.** While the system reports a secure field (a password manager, a browser's
-  password box), the app does not look at the keys at all.
-- **Minimal footprint.** The app creates three plain text files in `~/Library/Application Support/ghbdtn vbh/`:
-  your exceptions (`exceptions.txt`), your manual corrections (`words.txt`) and excluded sites (`sites.txt`).
-  All of them are visible in the settings.
-- **The clipboard is barely touched.** Only in one case: you asked to convert the selected text, and the
-  application (Electron, some browsers) does not hand it over directly. Then the app presses Cmd+C, reads the
-  text and immediately puts back whatever the clipboard held before.
-- **Local statistics.** Unknown words are judged by a built-in table of letter-combination frequencies. It holds
-  dry probabilities only; none of your words are in it.
+The app sees everything you type; [why that is safe](SECURITY.md#why-it-can-be-trusted-with-your-keyboard).
+How to help, and how to build from source, is in [CONTRIBUTING.md](CONTRIBUTING.md). After every update the
+Accessibility grant has to be given again — the build's signature changes.
 
 ## What it does
 
@@ -143,47 +122,6 @@ Instead of promises, tests anyone can run (`./test.sh`):
   the foreign lists.
 - A decision is made locally, in memory, in under a millisecond. Even in a hard test of 11,000 substitutions
   only a handful took longer than 10 ms (the macOS dictionary itself thinking things over).
-
-## Installation in detail
-
-- **Prebuilt:** download the `.zip` from [Releases](https://github.com/mikakostoev/ghbdtn-vbh/releases),
-  unpack and move the `.app` into Applications. The build is universal (Apple Silicon and Intel) and needs
-  macOS 13 Ventura or newer. The file is built automatically on GitHub's servers from the very code in the
-  repository.
-- **First launch:** the app has no paid Apple developer certificate ($99 a year), so macOS stops it. Click
-  "Open Anyway" in the notification, or right-click the icon → Open. After every update the Accessibility grant
-  has to be given again — the build's signature changes.
-- **Homebrew:** the command above. Installed without `--no-quarantine`, the first launch needs the same "Open
-  Anyway" step.
-
-## Building from source (if you don't trust the prebuilt file)
-
-Xcode or the Command Line Tools are required.
-
-```bash
-git clone https://github.com/mikakostoev/ghbdtn-vbh.git && cd ghbdtn-vbh
-```
-
-```bash
-./build.sh
-```
-
-```bash
-open "ghbdtn vbh.app"
-```
-
-To stop macOS from asking for Accessibility after every rebuild, create a free self-signed code-signing
-certificate in Keychain Access named `LayoutSwitcher Local Signing` (Certificate Assistant). The scripts build
-and sign the app with it.
-
-A release is built with `./release.sh 2.0.0`, which produces the universal archive. On GitHub, every merge to
-main that changes the app does exactly the same under the next patch version and attaches the file to the
-release; a pushed version tag does it for that version.
-
-## Making sure it works
-
-- `./test.sh` — builds, runs the self-test and the checks on texts.
-- `Tests/live.sh` — opens a test window and emulates live typing for a few seconds, taking over the keyboard.
 
 ## Licence
 

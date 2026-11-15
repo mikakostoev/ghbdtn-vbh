@@ -23,4 +23,15 @@ cask "ghbdtn-vbh" do
     "~/Library/Preferences/app.ghbdtnvbh.plist",
     "~/Library/Preferences/local.layoutswitcher.plist",
   ]
+
+  # Unsigned/ad-hoc: Homebrew removed --no-quarantine in 6.0 (deprecated in 5.0). There is no replacement
+  # cask flag. First launch still needs Open Anyway, or xattr -dr com.apple.quarantine on the .app.
+  caveats <<~EOS
+    The app is unsigned, so macOS quarantines the first launch. Homebrew has no flag to skip that.
+    Open System Settings → Privacy & Security and click Open Anyway, or right-click the app → Open.
+    Then allow it under Accessibility.
+
+    From the command line the same Gatekeeper step is:
+      xattr -dr com.apple.quarantine "/Applications/ghbdtn vbh.app"
+  EOS
 end

@@ -27,7 +27,14 @@
 @media (min-width: 1440px) { :root { --type: 94px; --text: 43px; } }
 @media (min-width: 1920px) { :root { --type: 124px; --text: 48px; --pad: 112px; } }
 
-* { box-sizing: border-box; margin: 0; }
+* {
+  box-sizing: border-box;
+  margin: 0;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
 /* One block per screen, and a swipe or a wheel turn moves exactly one block, like slides. */
 html { scroll-snap-type: y mandatory; }
 body { background: var(--bg); color: var(--ink); font: 400 var(--text)/1.18 Inter, -apple-system, BlinkMacSystemFont, "Helvetica Neue", Arial, sans-serif; -webkit-font-smoothing: antialiased; }

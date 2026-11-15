@@ -16,10 +16,6 @@ Xcode or the Command Line Tools, macOS 13+. To install a release instead of buil
 brew tap mikakostoev/ghbdtn-vbh https://github.com/mikakostoev/ghbdtn-vbh && brew install --cask ghbdtn-vbh
 ```
 
-Homebrew has no `--no-quarantine` flag any more. On first launch: System Settings → Privacy & Security →
-"Open Anyway", or right-click the app → Open; from the command line,
-`xattr -dr com.apple.quarantine "/Applications/ghbdtn vbh.app"`. Then grant Accessibility.
-
 To stop macOS from asking for Accessibility after every rebuild, create a free self-signed code-signing
 certificate in Keychain Access named `LayoutSwitcher Local Signing` (Certificate Assistant). The scripts build
 and sign the app with it.
@@ -61,9 +57,8 @@ patch releases continue from it. The build is
 ad-hoc-signed until `DEVELOPER_ID_P12` is set; once it is, the other four secrets listed at the top of
 `.github/workflows/release.yml` must be set too, or the run fails — with all five, the same tag comes out
 signed with a Developer ID, notarized and stapled, and macOS opens it without "Open Anyway". Nothing in the
-app changes either way. When those secrets are added, the first-launch/"Open Anyway" notes in `README.md`,
-the cask caveats, and `index.html` on the `landing` branch need updating too — they currently say the app
-is unsigned.
+app changes either way. When those secrets are added, the cask `postflight` that strips quarantine can go —
+a notarized build opens without it.
 
 ## The site
 

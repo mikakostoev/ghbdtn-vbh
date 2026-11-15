@@ -37,11 +37,8 @@ brew tap mikakostoev/ghbdtn-vbh https://github.com/mikakostoev/ghbdtn-vbh && bre
 Or download the archive from [Releases](https://github.com/mikakostoev/ghbdtn-vbh/releases) and drag
 `ghbdtn vbh.app` into Applications.
 
-On first launch macOS blocks the app: the build has no paid Apple certificate, and Homebrew no longer has a
-flag to skip quarantine (`--no-quarantine` was removed). Go to System Settings → Privacy & Security, click
-"Open Anyway", or right-click the icon → Open. From the command line the same step is
-`xattr -dr com.apple.quarantine "/Applications/ghbdtn vbh.app"`. Then allow the app under Accessibility.
-Without that it cannot see keystrokes.
+Allow the app under Accessibility (System Settings → Privacy & Security). Without that it cannot see
+keystrokes.
 
 Open any text editor, type `ghbdtn` and press space.
 

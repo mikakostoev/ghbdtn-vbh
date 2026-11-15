@@ -87,12 +87,22 @@ section { display: flex; flex-direction: column; justify-content: center; min-he
 <section class="cta"><a href="https://github.com/mikakostoev">About me</a></section>
 </main>
 <script>
-// Three examples on a loop. Each is typed with a human rhythm in the wrong layout, gets the red squiggle of a
+// Examples on a loop. Each is typed with a human rhythm in the wrong layout, gets the red squiggle of a
 // misspelling, then is fixed key by key: every letter turns, left to right, into the one on the same key in the
-// other layout, and the input source badge under the caret switches with it.
+// other layout, and the input source badge under the caret switches with it. Typed and fixed must be the same
+// length: the flip walks the two strings in lockstep.
 (() => {
   if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-  const examples = [['ghbdtn vbh', 'привет мир', 'EN', 'RU'], ['руддщ цщкдв', 'hello world', 'RU', 'EN'], ['ltdjgcjd', 'девопсов', 'EN', 'RU']];
+  const examples = [
+    ['ghbdtn vbh', 'привет мир', 'EN', 'RU'],
+    ['руддщ цщкдв', 'hello world', 'RU', 'EN'],
+    ['ltdjgcjd', 'девопсов', 'EN', 'RU'],
+    ['ерфтлы', 'thanks', 'RU', 'EN'],
+    ['rfr ltkf', 'как дела', 'EN', 'RU'],
+    ['ьууештп', 'meeting', 'RU', 'EN'],
+    ['ctujlyz', 'сегодня', 'EN', 'RU'],
+    ['пшерги', 'github', 'RU', 'EN'],
+  ];
   const type = document.querySelector('.type'), line = type.querySelector('.line'), word = type.querySelector('.word'),
         badge = type.querySelector('b');
   const sleep = ms => new Promise(done => setTimeout(done, ms));

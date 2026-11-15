@@ -31,7 +31,7 @@ and English ([languages](#languages)).
 ## Install
 
 ```bash
-brew tap mikakostoev/ghbdtn-vbh https://github.com/mikakostoev/ghbdtn-vbh && brew install --cask ghbdtn-vbh
+brew tap mikakostoev/ghbdtn-vbh https://github.com/mikakostoev/ghbdtn-vbh && brew trust --cask mikakostoev/ghbdtn-vbh/ghbdtn-vbh && brew install --cask ghbdtn-vbh
 ```
 
 Or download the archive from [Releases](https://github.com/mikakostoev/ghbdtn-vbh/releases) and drag

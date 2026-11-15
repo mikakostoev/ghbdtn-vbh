@@ -24,8 +24,9 @@ cask "ghbdtn-vbh" do
     "~/Library/Preferences/local.layoutswitcher.plist",
   ]
 
-  # Homebrew removed --no-quarantine (deprecated in 5.0, gone in 6.0; no replacement flag).
-  # Strip quarantine here so `brew install --cask` is the whole install.
+  # Homebrew 6 refuses third-party taps until trusted (`brew trust --cask …`).
+  # Homebrew also removed --no-quarantine (deprecated in 5.0, gone in 6.0; no replacement flag).
+  # Strip quarantine here so the README's one-line tap && trust && install is the whole install.
   postflight do
     next unless OS.mac?
 

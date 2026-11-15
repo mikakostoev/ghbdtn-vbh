@@ -23,4 +23,14 @@ cask "ghbdtn-vbh" do
     "~/Library/Preferences/app.ghbdtnvbh.plist",
     "~/Library/Preferences/local.layoutswitcher.plist",
   ]
+
+  # Homebrew removed --no-quarantine (deprecated in 5.0, gone in 6.0; no replacement flag).
+  # Strip quarantine here so `brew install --cask` is the whole install.
+  postflight do
+    next unless OS.mac?
+
+    system_command "/usr/bin/xattr",
+                   args:         ["-dr", "com.apple.quarantine", "#{appdir}/ghbdtn vbh.app"],
+                   must_succeed: false
+  end
 end

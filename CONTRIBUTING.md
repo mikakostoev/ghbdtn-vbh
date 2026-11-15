@@ -10,7 +10,17 @@ git clone https://github.com/mikakostoev/ghbdtn-vbh.git && cd ghbdtn-vbh
 ./build.sh && open "ghbdtn vbh.app"
 ```
 
-Xcode or the Command Line Tools, macOS 13+. Tasks for a first contribution are labelled
+Xcode or the Command Line Tools, macOS 13+. To install a release instead of building:
+
+```bash
+brew tap mikakostoev/ghbdtn-vbh https://github.com/mikakostoev/ghbdtn-vbh && brew install --cask ghbdtn-vbh
+```
+
+To stop macOS from asking for Accessibility after every rebuild, create a free self-signed code-signing
+certificate in Keychain Access named `LayoutSwitcher Local Signing` (Certificate Assistant). The scripts build
+and sign the app with it.
+
+Tasks for a first contribution are labelled
 [good first issue](https://github.com/mikakostoev/ghbdtn-vbh/labels/good%20first%20issue) — pick any and
 leave a comment saying you took it.
 
@@ -47,8 +57,8 @@ patch releases continue from it. The build is
 ad-hoc-signed until `DEVELOPER_ID_P12` is set; once it is, the other four secrets listed at the top of
 `.github/workflows/release.yml` must be set too, or the run fails — with all five, the same tag comes out
 signed with a Developer ID, notarized and stapled, and macOS opens it without "Open Anyway". Nothing in the
-app changes either way. When those secrets are added, the first-launch/"Open Anyway" notes in `README.md` and in
-`index.html` on the `landing` branch need updating too — they currently say the app is unsigned.
+app changes either way. When those secrets are added, the cask `postflight` that strips quarantine can go —
+a notarized build opens without it.
 
 ## The site
 
